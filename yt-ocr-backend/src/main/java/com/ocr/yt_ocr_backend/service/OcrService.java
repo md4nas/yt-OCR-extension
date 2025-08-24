@@ -6,6 +6,8 @@ import net.sourceforge.tess4j.TesseractException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 
 @Service
@@ -32,6 +34,7 @@ public class OcrService {
     @Value("${ocr.char-whitelist:}")
     private String charWhitelist;
 
+
     private  ITesseract newEngine(){
         Tesseract tesseract = new Tesseract();
         // Where thaineddata files live:
@@ -46,14 +49,28 @@ public class OcrService {
         tesseract.setVariable("preserve_interword_space", preserveSpaces);
 
         if (charWhitelist != null && !charWhitelist.isBlank()){
-            tesseract.setTessVariable("tessedit_char_whitelist", charWhitelist);
+            tesseract.setVariable("tessedit_char_whitelist", charWhitelist);
         }
         return tesseract;
     }
 
     public String doOcr(File imageFile) throws TesseractException {
         ITesseract engine = newEngine();
-        return engine.doOCR(imageFile);
+
+        try{
+            // Debug step: tryImageIO first
+            BufferedImage img = ImageIO.read(imageFile);
+            if (img == null) {
+                throw new RuntimeException("Image could not decode the file. Unsupported Format");
+            }
+            System.out.println("Loaded image: " + img.getWidth() + "x" + img.getHeight());
+
+
+            // Pass the Buffered Image directly to Tess4J
+            return engine.doOCR(img);
+        }catch (Exception e){
+            throw new RuntimeException("Image reading failed: " + e.getMessage());
+        }
     }
 
 }
