@@ -37,8 +37,17 @@ public class OcrService {
 
     private  ITesseract newEngine(){
         Tesseract tesseract = new Tesseract();
-        // Where thaineddata files live:
-        tesseract.setDatapath(tessdatapath);
+
+        // location of traineddata files :
+        String resolvePath;
+        if (tessdatapath.equals("tessdata") || tessdatapath.startsWith("./")) {
+            resolvePath = System.getProperty("user.dir") + "/yt-ocr-backend/tessdata";
+        } else {
+            resolvePath = tessdatapath;
+        }
+        tesseract.setDatapath(resolvePath);
+        System.out.println("using tessdata path " + resolvePath);
+
         // Language, e.g. "eng"
         tesseract.setLanguage(lang);
 
@@ -49,7 +58,7 @@ public class OcrService {
         tesseract.setVariable("preserve_interword_space", preserveSpaces);
 
         if (charWhitelist != null && !charWhitelist.isBlank()){
-            tesseract.setVariable("tessedit_char_whitelist", charWhitelist);
+            tesseract.setTessVariable("tessedit_char_whitelist", charWhitelist);
         }
         return tesseract;
     }
