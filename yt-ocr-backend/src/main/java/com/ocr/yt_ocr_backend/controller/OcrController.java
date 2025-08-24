@@ -14,6 +14,7 @@ import java.io.File;
 
 @RestController
 @RequestMapping("/api/ocr")
+@CrossOrigin(origins = "*")
 public class OcrController {
     private final OcrService ocrService;
 
