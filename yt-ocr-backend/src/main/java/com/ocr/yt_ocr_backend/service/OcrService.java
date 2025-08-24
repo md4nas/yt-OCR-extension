@@ -10,20 +10,20 @@ import java.io.File;
 
 @Service
 public class OcrService {
-    
-    @Value("$(ocr.tessdata-path)")
+
+    @Value("${ocr.tessdata-path}")
     private String tessdatapath;
 
-    @Value("$(ocr.lang:eng)")
+    @Value("${ocr.lang:eng}")
     private String lang;
 
-    @Value("$(ocr.psm:6)")
+    @Value("${ocr.psm:6}")
     private String psm;
 
-    @Value("$(ocr.eom:1)")
+    @Value("${ocr.oem:1}")
     private String oem;
 
-    @Value("$(ocr.user-defined-dpi:300)")
+    @Value("${ocr.user-defined-dpi:300}")
     private String userDfinedDpi;
 
     @Value("${ocr.preserve-interword-spaces:1}")
@@ -52,8 +52,8 @@ public class OcrService {
     }
 
     public String doOcr(File imageFile) throws TesseractException {
-        ITesseract enigne = newEngine();
-        return newEngine().doOCR(imageFile);
+        ITesseract engine = newEngine();
+        return engine.doOCR(imageFile);
     }
 
 }
