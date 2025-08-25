@@ -58,3 +58,68 @@ created
 @PostMapping("/file") → HTTP POST at /api/ocr/file with multipart/form-data.
 @PostMapping("/base64") → HTTP POST at /api/ocr/base64 with JSON.
 ResponseEntity<OcrResponse> → return HTTP status + body { "text": "..." }.
+
+
+## time 11:06 AM
+
+fixed some minutes typoes in code 
+- OcrService.java:
+
+Change all $( to ${ in @Value annotations (lines 13-20)
+
+Fix eom to oem in line 17
+
+Fix enigne to engine in line 45
+
+Use same engine instance in doOcr method
+
+application.properties:
+
+Change ocr.char-ehitelist to ocr.char-whitelis
+
+## time 05:11 PM
+
+trying to solve the issue 
+"Error opening data file tessdata/eng.traineddata
+Please make sure the TESSDATA_PREFIX environment variable is set to your "tessdata" directory.
+Failed loading language 'eng'
+Tesseract couldn't load any languages!"
+
+#### steps taken:
+1. change the wrong dataFile name from ENG to eng 
+2. updated the pom and remove the conflicting loggers
+3. Move tessdata folder to src/main/resources/ and update your service
+4. Fix the tessdata path resolution in newEngine() method:
+   - Replace this line:
+   - tesseract.setDatapath(tessdatapath);
+   - With this:
+     
+   - String resolvedPath;
+     if (tessdatapath.equals("tessdata") || tessdatapath.startsWith("./")) {
+     resolvedPath = System.getProperty("user.dir") + "/tessdata";
+     } else {
+     resolvedPath = tessdatapath;
+     }
+     tesseract.setDatapath(resolvedPath);
+     System.out.println("Using tessdata path: " + resolvedPath); // Debug line
+   - 
+5. Fix the variable name in setTessVariable:
+   - Change this line:
+   - tesseract.setVariable("tessedit_char_whitelist", charWhitelist);
+   - To:
+   - tesseract.setTessVariable("tessedit_char_whitelist", charWhitelist);
+   
+6. Update your application.properties:
+   - Change from:
+   - ocr.tessdata-path=tessdata
+   - To:
+   - resolvePath = System.getProperty("user.dir") + "/yt-ocr-backend/tessdata";
+
+finally getting the proper json output
+post: ("http://localhost:8080/api/ocr/file")
+
+backend done
+
+---
+
+### now next task to fix the spacing, indentation, row/line numbers
