@@ -57,6 +57,10 @@ public class OcrService {
         tesseract.setVariable("user_defined_dpi", userDfinedDpi);       // improves accuracy for small text
         tesseract.setVariable("preserve_interword_space", preserveSpaces);
 
+        // Page Segmentation Mode
+        tesseract.setPageSegMode(1); // automatic page segmentation
+        tesseract.setOcrEngineMode(1); // LSTM only
+
         if (charWhitelist != null && !charWhitelist.isBlank()){
             tesseract.setTessVariable("tessedit_char_whitelist", charWhitelist);
         }
