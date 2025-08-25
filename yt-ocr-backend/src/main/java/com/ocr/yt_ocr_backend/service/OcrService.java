@@ -78,6 +78,25 @@ public class OcrService {
             }
             System.out.println("Loaded image: " + img.getWidth() + "x" + img.getHeight());
 
+            // Get OCR text
+            String rawText = engine.doOCR(img);
+
+            // --- POST PROCESSING SECTION !!! ---
+            // Normalize spacing: replace multiple spaces with a single space
+            String cleaned = rawText.replaceAll("[ ]{2,}", " ");
+
+            //Preserve line breaks and add new row number
+            String[] lines = cleaned.split("\\r?\\n");
+            StringBuilder formatted = new StringBuilder();
+
+            int row = 1;
+            for (String line : lines) {
+                if (line.trim().isEmpty()){
+                    // skip empty lines
+                    formatted.append(row).append(". ").append(line.trim()).append("\n");
+                    row++;
+                }
+            }
 
             // Pass the Buffered Image directly to Tess4J
             return engine.doOCR(img);
