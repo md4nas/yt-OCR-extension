@@ -56,8 +56,8 @@ public class OcrService {
         tesseract.setVariable("user_defined_dpi", userDfinedDpi);       // improves accuracy for small text
         tesseract.setVariable("preserve_interword_space", preserveSpaces);
 
-        // Page Segmentation Mode
-        tesseract.setPageSegMode(1); // automatic page segmentation
+        // Better page segmentation for text blocks
+        tesseract.setPageSegMode(6); // uniform block of text
         tesseract.setOcrEngineMode(1); // LSTM only
 
         if (charWhitelist != null && !charWhitelist.isBlank()){
@@ -80,28 +80,72 @@ public class OcrService {
             // Get OCR text(raw text)
             String rawText = engine.doOCR(img);
 
-            // --- POST PROCESSING SECTION !!! ---
-            //  1. collapse multiple spaces
-            String cleaned = rawText.replaceAll("[ ]{2,}", " ").trim();
-
-            // 2. split into lines and add row numbers
-            String[] lines = cleaned.split("\\r?\\n");
-            StringBuilder formatted = new StringBuilder();
-
-            int row = 1;
-            for (String line : lines) {
-                if (!line.trim().isEmpty()) { // only include non-empty lines
-                    // skip empty lines
-                    formatted.append(row++).append(". ").append(line.trim()).append("\n");
-                }
-            }
-
-            // Pass the Buffered Image directly to Tess4J
-            return formatted.toString();
+            //Enhanced post-processing
+            return processOcrText(rawText);
 
         }catch (Exception e){
             throw new RuntimeException("Image reading failed: " + e.getMessage());
         }
     }
+
+    // Post-processing of OCR text
+    private String processOcrText(String rawText) {
+        if (rawText == null || rawText.trim().isEmpty()) {
+            return "No text detected";
+        }
+
+        // Enhanced text processing with aggressive word separation
+        String processed = rawText
+                .replaceAll("[|]", "I")
+                .replaceAll("(?<=[a-z])(?=[A-Z])", " ")  // Space before capitals
+                .replaceAll("(?<=[a-z])(?=\\d)", " ")     // Space before numbers
+                .replaceAll("(?<=\\d)(?=[a-zA-Z])", " ")  // Space after numbers
+                .replaceAll("([.!?])([A-Z])", "$1 $2")   // Space after sentence endings
+                // More aggressive word separation
+                .replaceAll("([a-z])([a-z]{2,}[A-Z])", "$1 $2")  // Split long concatenated words
+                .replaceAll("(but)([a-z])", "$1 $2")      // Fix 'but' concatenations
+                .replaceAll("(and)([a-z])", "$1 $2")      // Fix 'and' concatenations
+                .replaceAll("(the)([a-z])", "$1 $2")      // Fix 'the' concatenations
+                .replaceAll("(with)([a-z])", "$1 $2")     // Fix 'with' concatenations
+                .replaceAll("(that)([a-z])", "$1 $2")     // Fix 'that' concatenations
+                .replaceAll("\\s+", " ")
+                .trim();
+
+        // Split into sentences for better readability
+        String[] sentences = processed.split("(?<=[.!?])\\s+");
+        StringBuilder sb = new StringBuilder();
+
+        int lineNumber = 1;
+        for (String sentence : sentences) {
+            sentence = sentence.trim();
+            if (!sentence.isEmpty() && sentence.length() > 3) {
+                sb.append(lineNumber++).append(". ").append(sentence).append("\n");
+            }
+        }
+
+        return sb.toString();
+    }
+
+    private String processLine(String line) {
+        if (line.isEmpty()) {
+            return "";
+        }
+
+        // Add spaces before capital letter that follow Lowercase (likely word boundaries)
+        line = line.replaceAll("(?<=[a-z])(?=[A-Z])", " ");
+
+        // Add spaces around numbers that are likely saprated elements
+        line = line.replaceAll("(?<=[a-zA-Z])(?=\\d)", " ");
+        line = line.replaceAll("(?<=\\d)(?=[a-zA-Z])", " ");
+
+        // Fix common punctuation issues
+        line = line.replaceAll("\\s*([.!?,:;])\\s*", "$1 ");
+
+        // Clean up multiple spaces
+        line = line.replaceAll("\\s+", " ").trim();
+
+        return line;
+    }
+
 
 }
