@@ -1,8 +1,9 @@
-## date: 23-08-2025, 7:35pm
+#### date: 23-08-2025, 7:35pm
 
 ### controller/OcrController.java
 
 define:
+```
 @RestController
 @RequestMapping("/api/ocr")
 public class OcrController {
@@ -19,6 +20,7 @@ public ResponseEntity<String> extractText(@RequestParam("file") MultipartFile fi
 
 File convFile = File.createTempFile("ocr", ".png");
 file.transferTo(convFile);
+```
 
 - We temporarily save the uploaded file on disk, because Tesseract works with file paths.
 - Example: if you upload receipt.jpg, it gets stored as something like ocr12345.png.
@@ -45,7 +47,9 @@ String result = tesseract.doOCR(convFile);
 - Tesseract extracts text from the image.
 - Return extracted text as HTTP response.
 
-## date: 24-08-2025 12:03 AM
+---
+
+#### date: 24-08-2025,time: 12:03 AM
 
 created 
 - Image utilities (decode base64, simple preprocess)
@@ -59,8 +63,9 @@ created
 @PostMapping("/base64") → HTTP POST at /api/ocr/base64 with JSON.
 ResponseEntity<OcrResponse> → return HTTP status + body { "text": "..." }.
 
+---
 
-## time 11:06 AM
+#### date: 25-08-2025,time: 11:06 AM
 
 fixed some minutes typoes in code 
 - OcrService.java:
@@ -77,7 +82,7 @@ application.properties:
 
 Change ocr.char-ehitelist to ocr.char-whitelis
 
-## time 05:11 PM
+#### time 05:11 PM
 
 trying to solve the issue 
 "Error opening data file tessdata/eng.traineddata
@@ -85,7 +90,7 @@ Please make sure the TESSDATA_PREFIX environment variable is set to your "tessda
 Failed loading language 'eng'
 Tesseract couldn't load any languages!"
 
-#### steps taken:
+### steps taken:
 1. change the wrong dataFile name from ENG to eng 
 2. updated the pom and remove the conflicting loggers
 3. Move tessdata folder to src/main/resources/ and update your service
@@ -122,4 +127,154 @@ backend done
 
 ---
 
-### now next task to fix the spacing, indentation, row/line numbers
+## now next task to fix the spacing, indentation, row/line numbers
+
+#### date: 26-08-2025,time: 12:10AM
+
+- Right now,OCR is correctly extracting text but spacing / indentation / row numbers are lost.
+- fix this in OcrService.doOcr() by post-processing the raw OCR text before returning.
+
+```
+// Get OCR text
+        String rawText = engine.doOCR(img);
+
+        // ---- Post Processing Section ----
+        // Normalize spacing: replace multiple spaces with a single space
+        String cleaned = rawText.replaceAll("[ ]{2,}", " ");
+
+        // Preserve line breaks and add row numbers
+        String[] lines = cleaned.split("\\r?\\n");
+        StringBuilder formatted = new StringBuilder();
+
+        int row = 1;
+        for (String line : lines) {
+            if (!line.trim().isEmpty()) { // skip empty lines
+                formatted.append(row).append(". ").append(line.trim()).append("\n");
+                row++;
+            }
+        }
+```
+
+#### time: 6:20 pm 
+
+- found the issue! In your OcrService.doOcr method
+  - service method processes the text but returns the raw unprocessed text. The processed text with proper formatting is in the formatted StringBuilder but never return
+
+```
+// Change this line at the end of doOcr method:
+return engine.doOCR(img);
+
+// To this:
+return formatted.toString();
+```
+
+- Additional Improvements for Better JSON Output
+```
+package com.ocr.yt_ocr_backend.dto;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class OcrResponse {
+    @JsonProperty("extracted_text")
+    private String text;
+    
+    @JsonProperty("line_count")
+    private int lineCount;
+    
+    @JsonProperty("success")
+    private boolean success = true;
+
+    public OcrResponse() {}
+    
+    public OcrResponse(String text) {
+        this.text = text;
+        this.lineCount = text != null ? text.split("\n").length : 0;
+    }
+
+    // Getters and setters...
+    public String getText() { return text; }
+    public void setText(String text) { 
+        this.text = text;
+        this.lineCount = text != null ? text.split("\n").length : 0;
+    }
+    
+    public int getLineCount() { return lineCount; }
+    public void setLineCount(int lineCount) { this.lineCount = lineCount; }
+    
+    public boolean isSuccess() { return success; }
+    public void setSuccess(boolean success) { this.success = success; }
+}
+
+```
+
+- issue! The OCR is working but the text processing needs improvement. The main problems are:
+  - Word spacing : Words are getting concatenated (like "Helpwithcodesnippetsinareadme")
+  - Line breaks : Not preserving proper paragraph structure
+  - Special characters : Some characters are being misread
+
+- repalced the old post porcessing in doOcr() Method inside ocrService file with processOcrText() method
+
+```
+// --- POST PROCESSING SECTION !!! ---
+            
+            //  1. collapse multiple spaces
+            String cleaned = rawText.replaceAll("[ ]{2,}", " ").trim();
+
+            // 2. split into lines and add row numbers
+            String[] lines = cleaned.split("\\r?\\n");
+            StringBuilder formatted = new StringBuilder();
+
+            int row = 1;
+            for (String line : lines) {
+                if (!line.trim().isEmpty()) { // only include non-empty lines
+                    // skip empty lines
+                    formatted.append(row++).append(". ").append(line.trim()).append("\n");
+                }
+            }
+
+            // Pass the Buffered Image directly to Tess4J
+            return formatted.toString();
+```
+
+- Now let's move forward with your Chrome extension project! Here's the complete roadmap:
+
+## Project Structure Overview
+### Backend (Spring Boot) ✅ - Already completed
+
+- OCR API endpoints
+- Image processing with Tesseract
+- Base64 image handling
+
+### Frontend (Chrome Extension) - Next steps:
+- Manifest file - Extension configuration
+- Popup HTML/CSS - Extension UI
+- Content script - Screen capture functionality
+- Background script - API communication
+
+### Next Steps for Chrome Extension
+
+```
+1. Extension Structure
+chrome-extension/
+├── manifest.json
+├── popup.html
+├── popup.css
+├── popup.js
+├── content.js
+├── background.js
+└── icons/
+
+2. Key Features to Implement:
+
+Screen area selection - Using HTML5 Canvas
+- Image capture - Convert to base64
+- API integration - Send to your Spring Boot backend
+- Text display - Show OCR results
+- Copy funcionality - Copy extracted text
+
+3. Technologies Needed:
+- Manifest V3 - Latest Chrome extension format
+- Canvas API - For screen capture
+- Fetch API - Backend communication
+- Chrome APIs - activeTab, storage permissions
+```
