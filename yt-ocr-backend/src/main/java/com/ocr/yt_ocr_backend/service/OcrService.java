@@ -46,7 +46,6 @@ public class OcrService {
             resolvePath = tessdatapath;
         }
         tesseract.setDatapath(resolvePath);
-        System.out.println("using tessdata path " + resolvePath);
 
         // Language, e.g. "eng"
         tesseract.setLanguage(lang);
@@ -78,28 +77,28 @@ public class OcrService {
             }
             System.out.println("Loaded image: " + img.getWidth() + "x" + img.getHeight());
 
-            // Get OCR text
+            // Get OCR text(raw text)
             String rawText = engine.doOCR(img);
 
             // --- POST PROCESSING SECTION !!! ---
-            // Normalize spacing: replace multiple spaces with a single space
-            String cleaned = rawText.replaceAll("[ ]{2,}", " ");
+            //  1. collapse multiple spaces
+            String cleaned = rawText.replaceAll("[ ]{2,}", " ").trim();
 
-            //Preserve line breaks and add new row number
+            // 2. split into lines and add row numbers
             String[] lines = cleaned.split("\\r?\\n");
             StringBuilder formatted = new StringBuilder();
 
             int row = 1;
             for (String line : lines) {
-                if (line.trim().isEmpty()){
+                if (!line.trim().isEmpty()) { // only include non-empty lines
                     // skip empty lines
-                    formatted.append(row).append(". ").append(line.trim()).append("\n");
-                    row++;
+                    formatted.append(row++).append(". ").append(line.trim()).append("\n");
                 }
             }
 
             // Pass the Buffered Image directly to Tess4J
-            return engine.doOCR(img);
+            return formatted.toString();
+
         }catch (Exception e){
             throw new RuntimeException("Image reading failed: " + e.getMessage());
         }
