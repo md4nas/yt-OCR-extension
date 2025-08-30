@@ -278,3 +278,110 @@ Screen area selection - Using HTML5 Canvas
 - Fetch API - Backend communication
 - Chrome APIs - activeTab, storage permissions
 ```
+
+#### date: 30-08-2025
+
+### Optimize OCR performance by reusing Tesseract engine and reducing processing overhead
+
+- Optimizations Made:
+    - Engine Reuse: Tesseract engine is now created once and reused (major speed boost)
+
+    - Simplified Processing: Removed complex regex patterns that were slowing down post-processing
+
+    - Disabled Unnecessary Outputs: Turned off HOCR, PDF, and TSV generation
+
+    - Removed Debug Logging: Eliminated console output that adds overhead
+
+Changed: 
+```
+public String doOcr(File imageFile) throws TesseractException {
+        ITesseract engine = newEngine();
+
+        try{
+            // Debug step: tryImageIO first
+            BufferedImage img = ImageIO.read(imageFile);
+            if (img == null) {
+                throw new RuntimeException("Image could not decode the file. Unsupported Format");
+            }
+            System.out.println("Loaded image: " + img.getWidth() + "x" + img.getHeight());
+
+            // Get OCR text(raw text)
+            String rawText = engine.doOCR(img);
+
+            //Enhanced post-processing
+            return processOcrText(rawText);
+        }
+```
+TO:
+```
+public String doOcr(File imageFile) throws TesseractException {
+        if (tesseractEngine == null) {
+            tesseractEngine = newEngine();
+        }
+
+        try{
+            BufferedImage img = ImageIO.read(imageFile);
+            if (img == null) {
+                throw new RuntimeException("Image could not decode the file. Unsupported Format");
+            }
+
+            String rawText = tesseractEngine.doOCR(img);
+            return processOcrText(rawText);
+
+        }
+```
+
+- Optimize Tesseract settings for faster processing
+
+From:
+```
+
+        // Fine-tuning for code-like text:
+        tesseract.setVariable("tessedit_pageseg_mode", psm);              // PSM
+        tesseract.setVariable("tessedit_ocr_engine_mode", oem);          // OEM
+        tesseract.setVariable("user_defined_dpi", userDfinedDpi);       // improves accuracy for small text
+        tesseract.setVariable("preserve_interword_space", preserveSpaces);
+
+        // Better page segmentation for text blocks
+        tesseract.setPageSegMode(6); // uniform block of text
+        tesseract.setOcrEngineMode(1); // LSTM only
+
+```
+Change To:
+```
+ // Optimized for speed
+        tesseract.setPageSegMode(6); // uniform block of text
+        tesseract.setOcrEngineMode(1); // LSTM only
+        tesseract.setVariable("tessedit_create_hocr", "0");
+        tesseract.setVariable("tessedit_create_pdf", "0");
+        tesseract.setVariable("tessedit_create_tsv", "0");
+
+```
+
+### API Improvements Implemented
+
+- Enhanced JSON Response
+```
+{
+  "status": "success",
+  "rows": [
+    {"line_no": 1, "content": "Hello world"},
+    {"line_no": 2, "content": "This is OCR output"}
+  ],
+  "total_lines": 2,
+  "processing_time_ms": 1250
+}
+```
+- Processing Time Tracking
+  - Shows actual OCR processing time
+  - Useful for performance monitoring
+
+- Better Error Handling
+  - Specific status codes: file_too_large, invalid_format, ocr_failed
+  - Consistent error response structure
+
+#### File Changes
+- Replace simple OcrResponse with enhanced structure including rows and status
+- Enhance OcrBase64Request to support language selection and file size limits
+- Update OcrService to support language parameter and add processing time tracking
+- Update controller to use enhanced response format with timing and file validation
