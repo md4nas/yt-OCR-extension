@@ -24,18 +24,46 @@ public class OcrController {
 
     //1. Multipart endpoint
     @PostMapping(value="/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<OcrResponse> exteactFromFile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<OcrResponse> extractFromFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "language", defaultValue = "eng") String language) {
+        
+        long startTime = System.currentTimeMillis();
         File tmp = null;
+        
         try {
+            // File size validation (10MB limit)
+            if (file.getSize() > 10 * 1024 * 1024) {
+                OcrResponse response = new OcrResponse();
+                response.setStatus("file_too_large");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            // File format validation
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                OcrResponse response = new OcrResponse();
+                response.setStatus("invalid_format");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
             tmp = File.createTempFile("ocr_",".img");
             file.transferTo(tmp);
-            String text = ocrService.doOcr(tmp);
-            return ResponseEntity.ok(new OcrResponse(text));
-        }
-        catch (TesseractException te) {
-            return ResponseEntity.badRequest().body(new OcrResponse("OCR Failed: " + te.getMessage()));
+            String text = ocrService.doOcr(tmp, language);
+            
+            long processingTime = System.currentTimeMillis() - startTime;
+            return ResponseEntity.ok(new OcrResponse(text, processingTime));
+            
+        } catch (TesseractException te) {
+            long processingTime = System.currentTimeMillis() - startTime;
+            OcrResponse response = new OcrResponse("OCR Failed: " + te.getMessage(), processingTime);
+            response.setStatus("ocr_failed");
+            return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new OcrResponse("Error: " + e.getMessage()));
+            long processingTime = System.currentTimeMillis() - startTime;
+            OcrResponse response = new OcrResponse("Error: " + e.getMessage(), processingTime);
+            response.setStatus("error");
+            return ResponseEntity.badRequest().body(response);
         } finally {
             if (tmp != null) tmp.delete();
         }
@@ -44,16 +72,33 @@ public class OcrController {
     //2. Base64 endpoint (this is what extension will call)
     @PostMapping(value = "/base64", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<OcrResponse> extractFromBase64(@RequestBody OcrBase64Request req) {
+        long startTime = System.currentTimeMillis();
         File tmp = null;
+        
         try {
             tmp = ImageUtils.base64ToTempPng(req.getImageBase64());
-            String text = ocrService.doOcr(tmp);
-            return ResponseEntity.ok(new OcrResponse(text));
-        }
-        catch (TesseractException te) {
-            return ResponseEntity.badRequest().body(new OcrResponse("OCR Failed: " + te.getMessage()));
+            
+            // File size check after conversion
+            if (tmp.length() > req.getMaxFileSizeMB() * 1024 * 1024) {
+                OcrResponse response = new OcrResponse();
+                response.setStatus("file_too_large");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            String text = ocrService.doOcr(tmp, req.getLanguage());
+            long processingTime = System.currentTimeMillis() - startTime;
+            return ResponseEntity.ok(new OcrResponse(text, processingTime));
+            
+        } catch (TesseractException te) {
+            long processingTime = System.currentTimeMillis() - startTime;
+            OcrResponse response = new OcrResponse("OCR Failed: " + te.getMessage(), processingTime);
+            response.setStatus("ocr_failed");
+            return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new OcrResponse("Error: " + e.getMessage()));
+            long processingTime = System.currentTimeMillis() - startTime;
+            OcrResponse response = new OcrResponse("Error: " + e.getMessage(), processingTime);
+            response.setStatus("error");
+            return ResponseEntity.badRequest().body(response);
         } finally {
             if (tmp != null) tmp.delete();
         }
