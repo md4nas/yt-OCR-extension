@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>OCR Web App</title>
+    <link rel="stylesheet" href="/css/style.css"/>
+</head>
+<body>
+<div class="container">
+    <h1>OCR Text Extractor</h1>
+
+    <!-- Upload Section -->
+    <div class="upload-section">
+        <input type="file" id="fileInput" accept="image/*"/>
+        <button onclick="recapture()">Recapture</button>
+    </div>
+
+    <!-- Preview -->
+    <div class="preview-section">
+        <img id="preview" alt="Image Preview"/>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+        <button onclick="processImage()">Run OCR</button>
+        <button onclick="copyToClipboard()">Copy</button>
+        <button onclick="downloadText()">Download TXT</button>
+        <button onclick="downloadJson()">Download JSON</button>
+        <button onclick="clearResults()">Clear</button>
+    </div>
+
+    <!-- Results -->
+    <div class="results">
+        <h2>Extracted Text</h2>
+        <table id="resultsTable">
+            <thead>
+            <tr><th>Line No</th><th>Content</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <p id="processingTime"></p>
+    </div>
+
+    <!-- History -->
+    <div class="history">
+        <h2>History</h2>
+        <ul id="historyList"></ul>
+        <button onclick="clearHistory()">Clear History</button>
+    </div>
+</div>
+
+<script src="/js/script.js"></script>
+</body>
+</html>

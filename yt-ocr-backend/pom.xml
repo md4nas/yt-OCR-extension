@@ -27,6 +27,12 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
+		<!-- Thymeleaf for HTML templates -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+
 		<!-- Tess4J OCR (exclude old commons-logging to avoid conflict with spring-jcl) -->
 		<dependency>
 			<groupId>net.sourceforge.tess4j</groupId>
