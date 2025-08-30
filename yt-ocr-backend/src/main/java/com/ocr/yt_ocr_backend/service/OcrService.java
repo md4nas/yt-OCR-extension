@@ -34,6 +34,8 @@ public class OcrService {
     @Value("${ocr.char-whitelist:}")
     private String charWhitelist;
 
+    private ITesseract tesseractEngine;
+
 
     private  ITesseract newEngine(){
         Tesseract tesseract = new Tesseract();
@@ -50,15 +52,12 @@ public class OcrService {
         // Language, e.g. "eng"
         tesseract.setLanguage(lang);
 
-        // Fine-tuning for code-like text:
-        tesseract.setVariable("tessedit_pageseg_mode", psm);              // PSM
-        tesseract.setVariable("tessedit_ocr_engine_mode", oem);          // OEM
-        tesseract.setVariable("user_defined_dpi", userDfinedDpi);       // improves accuracy for small text
-        tesseract.setVariable("preserve_interword_space", preserveSpaces);
-
-        // Better page segmentation for text blocks
+        // Optimized for speed
         tesseract.setPageSegMode(6); // uniform block of text
         tesseract.setOcrEngineMode(1); // LSTM only
+        tesseract.setVariable("tessedit_create_hocr", "0");
+        tesseract.setVariable("tessedit_create_pdf", "0");
+        tesseract.setVariable("tessedit_create_tsv", "0");
 
         if (charWhitelist != null && !charWhitelist.isBlank()){
             tesseract.setTessVariable("tessedit_char_whitelist", charWhitelist);
@@ -67,20 +66,17 @@ public class OcrService {
     }
 
     public String doOcr(File imageFile) throws TesseractException {
-        ITesseract engine = newEngine();
+        if (tesseractEngine == null) {
+            tesseractEngine = newEngine();
+        }
 
         try{
-            // Debug step: tryImageIO first
             BufferedImage img = ImageIO.read(imageFile);
             if (img == null) {
                 throw new RuntimeException("Image could not decode the file. Unsupported Format");
             }
-            System.out.println("Loaded image: " + img.getWidth() + "x" + img.getHeight());
 
-            // Get OCR text(raw text)
-            String rawText = engine.doOCR(img);
-
-            //Enhanced post-processing
+            String rawText = tesseractEngine.doOCR(img);
             return processOcrText(rawText);
 
         }catch (Exception e){
@@ -94,20 +90,10 @@ public class OcrService {
             return "No text detected";
         }
 
-        // Enhanced text processing with aggressive word separation
+        // Simplified processing for speed
         String processed = rawText
                 .replaceAll("[|]", "I")
-                .replaceAll("(?<=[a-z])(?=[A-Z])", " ")  // Space before capitals
-                .replaceAll("(?<=[a-z])(?=\\d)", " ")     // Space before numbers
-                .replaceAll("(?<=\\d)(?=[a-zA-Z])", " ")  // Space after numbers
-                .replaceAll("([.!?])([A-Z])", "$1 $2")   // Space after sentence endings
-                // More aggressive word separation
-                .replaceAll("([a-z])([a-z]{2,}[A-Z])", "$1 $2")  // Split long concatenated words
-                .replaceAll("(but)([a-z])", "$1 $2")      // Fix 'but' concatenations
-                .replaceAll("(and)([a-z])", "$1 $2")      // Fix 'and' concatenations
-                .replaceAll("(the)([a-z])", "$1 $2")      // Fix 'the' concatenations
-                .replaceAll("(with)([a-z])", "$1 $2")     // Fix 'with' concatenations
-                .replaceAll("(that)([a-z])", "$1 $2")     // Fix 'that' concatenations
+                .replaceAll("(?<=[a-z])(?=[A-Z])", " ")
                 .replaceAll("\\s+", " ")
                 .trim();
 

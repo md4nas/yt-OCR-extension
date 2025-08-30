@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="com.obiscr.chatgpt.settings.EasyCodeState">
+    <option name="projectFiles" value="$PROJECT_DIR$/yt-ocr-backend/src/main/java/com/ocr/yt_ocr_backend/controller/OcrController.java;D:/Code/yt-ocr-backend/yt-ocr-backend/src/main/java/com/ocr/yt_ocr_backend/dto/OcrBase64Request.java;D:/Code/yt-ocr-backend/yt-ocr-backend/src/main/java/com/ocr/yt_ocr_backend/dto/OcrResponse.java;D:/Code/yt-ocr-backend/yt-ocr-backend/src/main/java/com/ocr/yt_ocr_backend/service/OcrService.java;D:/Code/yt-ocr-backend/yt-ocr-backend/src/main/java/com/ocr/yt_ocr_backend/util/ImageUtils.java;D:/Code/yt-ocr-backend/yt-ocr-backend/src/main/java/com/ocr/yt_ocr_backend/YtOcrBackendApplication.java;D:/Code/yt-ocr-backend/yt-ocr-backend/src/test/java/com/ocr/yt_ocr_backend/YtOcrBackendApplicationTests.java;D:/Code/yt-ocr-backend/yt-ocr-backend/DEVDOCS.md;D:/Code/yt-ocr-backend/README.md" />
+  </component>
+</project>
