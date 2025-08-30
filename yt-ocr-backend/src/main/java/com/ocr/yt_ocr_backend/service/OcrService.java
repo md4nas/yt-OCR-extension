@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
@@ -35,12 +36,16 @@ public class OcrService {
     private String charWhitelist;
 
     private ITesseract tesseractEngine;
+    private String currentLanguage;
 
 
-    private  ITesseract newEngine(){
+    private ITesseract newEngine() {
+        return newEngine(lang);
+    }
+
+    private ITesseract newEngine(String language) {
         Tesseract tesseract = new Tesseract();
 
-        // location of traineddata files :
         String resolvePath;
         if (tessdatapath.equals("tessdata") || tessdatapath.startsWith("./")) {
             resolvePath = System.getProperty("user.dir") + "/yt-ocr-backend/tessdata";
@@ -48,13 +53,11 @@ public class OcrService {
             resolvePath = tessdatapath;
         }
         tesseract.setDatapath(resolvePath);
+        tesseract.setLanguage(language);
 
-        // Language, e.g. "eng"
-        tesseract.setLanguage(lang);
-
-        // Optimized for speed
-        tesseract.setPageSegMode(6); // uniform block of text
-        tesseract.setOcrEngineMode(1); // LSTM only
+        // Balanced settings for accuracy and speed
+        tesseract.setPageSegMode(6);
+        tesseract.setOcrEngineMode(1);
         tesseract.setVariable("tessedit_create_hocr", "0");
         tesseract.setVariable("tessedit_create_pdf", "0");
         tesseract.setVariable("tessedit_create_tsv", "0");
@@ -66,8 +69,13 @@ public class OcrService {
     }
 
     public String doOcr(File imageFile) throws TesseractException {
-        if (tesseractEngine == null) {
-            tesseractEngine = newEngine();
+        return doOcr(imageFile, "eng");
+    }
+
+    public String doOcr(File imageFile, String language) throws TesseractException {
+        if (tesseractEngine == null || !language.equals(currentLanguage)) {
+            tesseractEngine = newEngine(language);
+            currentLanguage = language;
         }
 
         try{
@@ -76,6 +84,9 @@ public class OcrService {
                 throw new RuntimeException("Image could not decode the file. Unsupported Format");
             }
 
+            // Optimize image for faster processing
+            img = optimizeImage(img);
+            
             String rawText = tesseractEngine.doOCR(img);
             return processOcrText(rawText);
 
@@ -133,5 +144,24 @@ public class OcrService {
         return line;
     }
 
-
+    private BufferedImage optimizeImage(BufferedImage original) {
+        // Only resize if extremely large (over 3000px width)
+        int width = original.getWidth();
+        int height = original.getHeight();
+        
+        if (width > 3000) {
+            double scale = 3000.0 / width;
+            width = 3000;
+            height = (int) (height * scale);
+            
+            BufferedImage resized = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2d = resized.createGraphics();
+            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            g2d.drawImage(original, 0, 0, width, height, null);
+            g2d.dispose();
+            return resized;
+        }
+        
+        return original;
+    }
 }
