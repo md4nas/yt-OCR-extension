@@ -48,6 +48,26 @@
         <ul id="historyList"></ul>
         <button onclick="clearHistory()">Clear History</button>
     </div>
+
+    <!--Model for viewing previous OCR result -->
+
+    <!-- Modal for viewing previous OCR results -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Previous OCR Result</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <pre id="historyText"></pre>
+            </div>
+            <div class="modal-footer">
+                <button onclick="copyHistoryText()">Copy Text</button>
+                <button onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script src="/js/script.js"></script>

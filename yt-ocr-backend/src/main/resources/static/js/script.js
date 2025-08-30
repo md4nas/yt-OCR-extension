@@ -1,4 +1,5 @@
 let rows = []; // store current OCR result
+let historyData = JSON.parse(sessionStorage.getItem("ocrHistory")) || [];
 
 // Preview Image
 document.getElementById("fileInput").addEventListener("change", function(e) {
@@ -105,28 +106,68 @@ function clearResults() {
     document.getElementById("processingTime").textContent = "";
 }
 
-// History (LocalStorage)
+// Enhanced History with sessionStorage
 function saveToHistory(rows) {
-    let history = JSON.parse(localStorage.getItem("ocrHistory")) || [];
-    history.push(rows);
-    localStorage.setItem("ocrHistory", JSON.stringify(history));
+    const extractedText = rows.map(r => r.content).join("\n");
+    const entry = {
+        id: historyData.length + 1,
+        time: new Date().toLocaleTimeString(),
+        lineCount: rows.length,
+        content: extractedText,
+        rows: rows
+    };
+
+    historyData.push(entry);
+    sessionStorage.setItem("ocrHistory", JSON.stringify(historyData));
     renderHistory();
 }
 
 function renderHistory() {
-    let history = JSON.parse(localStorage.getItem("ocrHistory")) || [];
-    const list = document.getElementById("historyList");
-    list.innerHTML = "";
-    history.forEach((h, idx) => {
+    const historyList = document.getElementById("historyList");
+    historyList.innerHTML = "";
+
+    historyData.forEach(item => {
         const li = document.createElement("li");
-        li.textContent = `Run ${idx+1} - ${h.length} lines`;
-        list.appendChild(li);
+        li.innerHTML = `
+          <div class="history-item">
+            <span><b>Sr.No. ${item.id}</b> (${item.time}) - ${item.lineCount} lines</span>
+            <button onclick="viewHistory(${item.id})" class="view-btn">View</button>
+          </div>
+        `;
+        historyList.appendChild(li);
     });
 }
 
+function viewHistory(id) {
+    const item = historyData.find(h => h.id === id);
+    if (item) {
+        document.getElementById("historyText").innerText = item.content;
+        document.getElementById("historyModal").style.display = "block";
+    }
+}
+
+function closeModal() {
+    document.getElementById("historyModal").style.display = "none";
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById("historyModal");
+    if (event.target === modal) {
+        closeModal();
+    }
+}
+
+function copyHistoryText() {
+    const text = document.getElementById("historyText").textContent;
+    navigator.clipboard.writeText(text);
+    alert("History text copied to clipboard!");
+}
+
 function clearHistory() {
-    localStorage.removeItem("ocrHistory");
-    document.getElementById("historyList").innerHTML = "";
+    historyData = [];
+    sessionStorage.removeItem("ocrHistory");
+    renderHistory();
 }
 
 // Load history on start

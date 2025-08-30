@@ -385,3 +385,50 @@ Change To:
 - Enhance OcrBase64Request to support language selection and file size limits
 - Update OcrService to support language parameter and add processing time tracking
 - Update controller to use enhanced response format with timing and file validation
+
+### FrontEnd Part
+
+```
+src/main/resources/
+├── static/
+│   ├── css/style.css  ✅
+│   └── js/script.js   ✅
+├── templates/
+│   └── index.html     ✅
+└── application.properties
+```
+- Added WebController
+- Added Thymeleaf Dependency
+
+#### Features:
+- Non-Selectable Line Numbers
+- Content-Only Copy
+- Visual
+- Manual copy,Copy button
+- Image preview + recapture
+- Copy, Download TXT, Download JSON
+- Processing time display
+- Clean, lightweight UI
+
+### Improvement
+
+- 1.History List Update: 
+   - Instead of plain text, each history item will have:
+     - Timestamp / Run No.
+     - Line Count
+     - View Button → Opens a modal (popup) or expandable section showing the extracted text.
+
+- 2.Temporary Storage (per session):
+  - Use sessionStorage (not localStorage) so history is stored only until the page is refreshed.
+  - This avoids saving anything on the server.
+
+- 3.UI Changes:
+  - Add a View History button in each history entry.
+  - When clicked → Show a modal with the text that was extracted in that OCR run.
+
+### Flow
+
+- User runs OCR → results displayed + saved in sessionStorage.
+- History entry created with View button.
+- Clicking View opens a modal showing the exact extracted text.
+- Closing modal hides it, but history stays until refresh or "Clear History".
