@@ -126,22 +126,35 @@ function renderHistory() {
     const historyList = document.getElementById("historyList");
     historyList.innerHTML = "";
 
-    historyData.forEach(item => {
+    historyData.forEach((item, index) => {
         const li = document.createElement("li");
+        // Fix undefined issue by ensuring all properties exist
+        const runId = item.id || (index + 1);
+        const time = item.time || 'Unknown time';
+        const lineCount = item.lineCount || (item.content ? item.content.split('\n').length : 0);
+        
         li.innerHTML = `
           <div class="history-item">
-            <span><b>Sr.No. ${item.id}</b> (${item.time}) - ${item.lineCount} lines</span>
-            <button onclick="viewHistory(${item.id})" class="view-btn">View</button>
+            <span><b>Sr.No. ${runId}</b> (${time}) - ${lineCount} lines</span>
+            <button onclick="viewHistory(${runId})" class="view-btn">View</button>
           </div>
         `;
         historyList.appendChild(li);
     });
 }
 
+function reloadHistory() {
+    // Reload history from sessionStorage
+    historyData = JSON.parse(sessionStorage.getItem("ocrHistory")) || [];
+    renderHistory();
+    alert('History reloaded!');
+}
+
 function viewHistory(id) {
-    const item = historyData.find(h => h.id === id);
+    const item = historyData.find((h, index) => (h.id || (index + 1)) === id);
     if (item) {
-        document.getElementById("historyText").innerText = item.content;
+        const content = item.content || item.text || 'No content available';
+        document.getElementById("historyText").innerText = content;
         document.getElementById("historyModal").style.display = "block";
     }
 }
