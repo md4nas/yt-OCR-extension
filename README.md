@@ -38,14 +38,22 @@ A powerful Spring Boot backend with Chrome extension for real-time text extracti
 └─────────────────┘    └──────────────────┘    └─────────────────┘
 ```
 
-```agsl
+```mermaid
 flowchart TD
-    A[Browser Extension] -->|Base64 Image| B[Spring Boot API]
+    A[Browser Extension]
+
+    %% API
+    A -->|Base64 Image| B[Spring Boot API]
     B -->|Image Processing| C[Tess4J OCR Engine]
     C -->|Extracted Text| B
     B -->|JSON Response| A
+
+    %% UI
     A -->|Display & Copy| D[User Interface]
+
+    %% Database
     B -->|Optional Storage| E[(Database)]
+
 ```
 
 ### Tech Stack
