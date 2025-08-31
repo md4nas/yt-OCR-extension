@@ -14,7 +14,24 @@ if (!window.ocrContentInjected) {
     floatBtn.id = 'ocrFloatBtn';
     floatBtn.title = 'Click to start selection';
     floatBtn.innerText = 'OCR';
+    floatBtn.style.display = 'none'; // Hidden by default
     document.documentElement.appendChild(floatBtn);
+    
+    // Check initial state and show/hide button
+    chrome.storage.local.get(['ocrEnabled'], function(result) {
+        const isEnabled = result.ocrEnabled || false;
+        floatBtn.style.display = isEnabled ? 'block' : 'none';
+    });
+    
+    // Listen for toggle messages from popup
+    chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+        if (request.action === 'toggleOCR') {
+            floatBtn.style.display = request.enabled ? 'block' : 'none';
+            if (!request.enabled && selecting) {
+                cancelSelection(); // Cancel any active selection
+            }
+        }
+    });
 
     // result panel (hidden by default)
     const resultPanel = document.createElement('div');

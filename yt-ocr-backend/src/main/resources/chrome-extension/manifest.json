@@ -2,9 +2,17 @@
   "manifest_version": 3,
   "name": "Mini OCR Capture",
   "description": "Select area on page, capture and OCR via backend",
-  "version": "1.0",
-  "permissions": ["activeTab", "scripting", "storage", "tabs"],
-  "host_permissions": ["http://localhost:8080/*", "<all_urls>"],
+  "version": "1.1",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://localhost:8080/*",
+    "<all_urls>"
+  ],
   "background": {
     "service_worker": "background.js"
   },
@@ -17,5 +25,8 @@
       "js": ["content.js"],
       "css": ["styles.css"]
     }
-  ]
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src http://localhost:8080"
+  }
 }

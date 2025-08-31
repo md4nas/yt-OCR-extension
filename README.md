@@ -294,7 +294,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👨💻 Author
 
 **Mohd Anas**
-- GitHub: [@your-username](https://github.com/md4nas)
+- GitHub: [@md4nas](https://github.com/md4nas)
 - Email: md.anas1028@gmail.com
 
 ## 🙏 Acknowledgments

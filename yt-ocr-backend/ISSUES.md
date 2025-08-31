@@ -331,10 +331,72 @@ private ITesseract newEngine() {
    - **Memory Usage**: Reduced by 47%
    - **CPU Usage**: Reduced by 60%
 
+## Other Borwser Support
+
+### Issue #8: Extension Not Working in Other Browsers
+
+**Solution**: Imporved manifest and background.js
+-  For Edge/Brave:
+   - Go to edge://extensions → enable Developer Mode, and follow same steops as Chrome
+- Only Brave:
+   - Trackers & ads blocking(For Localhost) : Disabled
+   - Upgrade connections to HTTPS : Disabled
+
+**Date**: August 31, 2025  
+**Severity**: Medium  
+**Status**: ✅ Resolved
+
+- manifest.json
+
+```json
+  "version": "1.1",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://localhost:8080/*",
+    "<all_urls>"
+  ]
+  
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src http://localhost:8080"
+  }
+```
+- bcakgorund.js
+```javascript
+// background.js (service worker)
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+   if (msg && msg.type === 'captureVisibleTab') {
+      chrome.tabs.captureVisibleTab({ format: 'png' }, dataUrl => {
+         if (chrome.runtime.lastError || !dataUrl) {
+            sendResponse({
+               success: false,
+               error: chrome.runtime.lastError?.message || 'capture failed'
+            });
+            return;
+         }
+
+         // Pass back the raw base64 screenshot (cropping happens in content.js / backend)
+         sendResponse({
+            success: true,
+            dataUrl
+         });
+      });
+
+      // Keep channel open for async response
+      return true;
+   }
+});
+```
+
 ## 🚀 Deployment Issues
 
-### Issue #8: CORS Configuration
-**Date**: Development Phase  
+### Issue #9: CORS Configuration
+
+**Date**: August 30, 2025  
 **Severity**: Medium  
 **Status**: ✅ Resolved
 
@@ -391,7 +453,7 @@ pie title Issue Distribution
 
 ### Frontend Debugging
 ```mermaid
-flowchart TD
+flowchart LR
     A[Issue Reported] --> B[Browser Console]
     B --> C[Network Tab]
     C --> D[Extension Console]
@@ -402,7 +464,7 @@ flowchart TD
 
 ### Backend Debugging
 ```mermaid
-flowchart TD
+flowchart LR
     A[API Error] --> B[Application Logs]
     B --> C[Stack Trace Analysis]
     C --> D[Database/File Check]
@@ -452,5 +514,3 @@ flowchart TD
 ---
 
 *Last Updated: January 31, 2025*  
-*Total Issues Resolved: 8*  
-*Average Resolution Time: 1.2 days*

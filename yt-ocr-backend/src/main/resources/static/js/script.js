@@ -51,7 +51,7 @@ async function processImage() {
         saveToHistory(rows);
         
         const timeMs = result.processing_time_ms || 0;
-        document.getElementById("processingTime").textContent = `✅ Took ${(timeMs/1000).toFixed(2)} sec`;
+        document.getElementById("processingTime").textContent = `✅ Time Taken ${(timeMs/1000).toFixed(2)} sec`;
     } catch (error) {
         console.error("OCR Error:", error);
         document.getElementById("processingTime").textContent = "❌ Error occurred";

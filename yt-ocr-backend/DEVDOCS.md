@@ -427,6 +427,7 @@ tesseract.setDatapath(resolvedPath);
 
 #### 2. Chrome Extension Not Loading
 **Error**: Extension fails to load
+
 **Solutions**:
 - Remove icon references from manifest.json
 - Check permissions in manifest
@@ -434,6 +435,7 @@ tesseract.setDatapath(resolvedPath);
 
 #### 3. Screen Capture Failure
 **Error**: "Failed to capture" in extension
+
 **Solution**: Add proper permissions
 ```json
 {
@@ -444,6 +446,7 @@ tesseract.setDatapath(resolvedPath);
 
 #### 4. CORS Issues
 **Error**: Cross-origin request blocked
+
 **Solution**: Add CORS configuration
 ```java
 @CrossOrigin(origins = "*")
@@ -451,6 +454,34 @@ tesseract.setDatapath(resolvedPath);
 public class OcrController {
     // Controller implementation
 }
+```
+
+#### 5. Other Brower Support Issue
+**Extension not supporting in otehr brower like Brave/Edge**
+
+**Solution**: imporved manifest and background.js
+-  For Edge/Brave: 
+   - Go to edge://extensions → enable Developer Mode, and follow same steops as Chrome
+- Only Brave:
+  - Trackers & ads blocking(For Localhost) : Disabled
+  - Upgrade connections to HTTPS : Disabled
+
+```json
+  "version": "1.1",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://localhost:8080/*",
+    "<all_urls>"
+  ]
+  
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src http://localhost:8080"
+  }
 ```
 
 ### Debug Workflow
