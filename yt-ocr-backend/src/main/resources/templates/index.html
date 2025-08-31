@@ -3,12 +3,23 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>OCR Web App</title>
+    <title>OCR Text Extractor - Extract Text from Images</title>
     <link rel="stylesheet" href="/css/style.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-eye logo-icon"></i>
+                <h1>OCR Text Extractor</h1>
+            </div>
+            <p class="tagline">Extract text from images with AI-powered OCR technology</p>
+        </div>
+    </header>
+
 <div class="container">
-    <h1>OCR Text Extractor</h1>
 
     <!-- Upload Section -->
     <div class="upload-section">
@@ -45,11 +56,12 @@
     <!-- History -->
     <div class="history">
         <h2>History</h2>
+        <div class="history-buttons">
+            <button onclick="reloadHistory()">Reload History</button>
+            <button onclick="clearHistory()">Clear History</button>
+        </div>
         <ul id="historyList"></ul>
-        <button onclick="clearHistory()">Clear History</button>
     </div>
-
-    <!--Model for viewing previous OCR result -->
 
     <!-- Modal for viewing previous OCR results -->
     <div id="historyModal" class="modal">
@@ -69,6 +81,63 @@
     </div>
 
 </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3><i class="fas fa-eye"></i> OCR Text Extractor</h3>
+                <p>Extract text from images using OCR technology.</p>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Features</h4>
+                <ul>
+                    <li><i class="fas fa-upload"></i> Upload Images</li>
+                    <li><i class="fas fa-crop"></i> Screen Capture</li>
+                    <li><i class="fas fa-copy"></i> Auto Copy Text</li>
+                    <li><i class="fas fa-history"></i> History Tracking</li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Connect</h4>
+                <div class="social-links">
+                    <a href="https://github.com/md4nas/yt-OCR-extension" target="_blank">
+                        <i class="fab fa-github"></i> GitHub
+                    </a>
+                    <a href="https://www.linkedin.com/in/mohd-anas-3a4a04287/" target="_blank">
+                        <i class="fab fa-linkedin"></i> LinkedIn
+                    </a>
+                    <a href="mailto:md.anas1028@gmail.com">
+                        <i class="fas fa-envelope"></i> Contact
+                    </a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">Documentation</a></li>
+                    <li><a href="#">Report Issues</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <div class="footer-bottom-content">
+                <p>&copy; 2025 OCR Text Extractor. All rights reserved.</p>
+                <div class="developer-credit">
+                    <span>Made by</span>
+                    <a href="https://github.com/md4nas" target="_blank">
+                        <i class="fab fa-github"></i> @md4nas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
 <script src="/js/script.js"></script>
 </body>
