@@ -445,7 +445,7 @@ flowchart TD
    - Screenshots/logs
 
 ### Contact Information
-- **GitHub Issues**: [Create new issue](https://github.com/md4nas/yt-ocr-backend/issues)
+- **GitHub Issues**: [Create new issue](https://github.com/md4nas/yt-OCR-extension/blob/main/yt-ocr-backend/ISSUES.md)
 - **Email**: md.anas1028@gmail.com
 - **Documentation**: Refer to DEVDOCS.md for technical details
 

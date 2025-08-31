@@ -74,6 +74,9 @@ flowchart TD
 
 ## 📁 Project Structure
 
+<details>
+<summary><strong>📁 All Directories & Files</strong></summary>
+
 ```
 yt-ocr-backend/
 ├── src/main/java/com/ocr/yt_ocr_backend/
@@ -100,6 +103,8 @@ yt-ocr-backend/
 ├── CHANGELOG.md                         # Version history
 └── LICENSE                              # MIT License
 ```
+</details>
+---
 
 ## 🔄 Workflow
 
@@ -289,8 +294,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👨💻 Author
 
 **Mohd Anas**
-- GitHub: [@your-username](https://github.com/your-username)
-- Email: your.email@example.com
+- GitHub: [@your-username](https://github.com/md4nas)
+- Email: md.anas1028@gmail.com
 
 ## 🙏 Acknowledgments
 

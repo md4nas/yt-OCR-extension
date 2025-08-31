@@ -109,7 +109,7 @@ flowchart LR
 
 #### Text Processing Pipeline
 ```mermaid
-flowchart TD
+flowchart LR
     A[Raw OCR Text] --> B[Normalize Spacing]
     B --> C[Split into Lines]
     C --> D[Filter Empty Lines]
@@ -504,7 +504,7 @@ mindmap
 ## 📞 Developer Support
 
 For technical questions and development support:
-- **GitHub Issues**: [Report technical issues](https://github.com/md4nas/yt-ocr-backend/issues)
+- **GitHub Issues**: [Report technical issues](https://github.com/md4nas/yt-OCR-extension/blob/main/yt-ocr-backend/ISSUES.md)
 - **Email**: md.anas1028@gmail.com
 - **Documentation**: This file and inline code comments
 

@@ -2,9 +2,6 @@
 
 All notable changes to the YT-OCR Backend project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
 ## 🔄 Development Flow
 
 ```mermaid
@@ -247,7 +244,7 @@ When updating the extension:
 ## Support
 
 For support and questions:
-- GitHub Issues: [Report bugs or request features](https://github.com/md4nas/yt-OCR-extension/issues)
+- GitHub Issues: [Report bugs or request features](https://github.com/md4nas/yt-OCR-extension/blob/main/yt-ocr-backend/ISSUES.md)
 - Email: md.anas1028@gmail.com
 - LinkedIn: [mohd-anas-3a4a04287](https://www.linkedin.com/in/mohd-anas-3a4a04287/)
 
