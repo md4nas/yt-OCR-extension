@@ -2,18 +2,49 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>OCR Capture</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>VisionText OCR</title>
+    <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-<div class="popup">
-    <h3>Mini OCR Capture</h3>
-    <button id="toggleBtn">Enable OCR Mode</button>
-    <p class="hint">Click the button, then click-and-drag on page to select area.</p>
+<div class="popup-card">
+
+    <!-- Title Row with Icon -->
+    <div class="title-row">
+        <svg xmlns="http://www.w3.org/2000/svg" class="logo-icon" viewBox="0 0 576 512">
+            <path d="M572.52 241.4c-1.31-1.68-32.85-41.1-87.54-81.4C429.47
+            126.9 370.71 96 288 96c-82.68 0-141.47 30.9-197
+            64c-54.69 40.3-86.23 79.7-87.54 81.4c-5.03
+            6.46-5.03 15.44 0 21.9c1.31 1.68 32.85 41.1
+            87.54 81.4c55.53 33.1 114.32 64 197
+            64c82.71 0 141.47-30.9 197-64c54.69-40.3
+            86.23-79.7 87.54-81.4c5.03-6.46
+            5.03-15.44 0-21.9zM288 336c-66.17
+            0-120-53.83-120-120s53.83-120
+            120-120s120 53.83 120
+            120s-53.83 120-120
+            120zm0-192a72 72 0 1 0 0 144
+            72 72 0 1 0 0-144z"/>
+        </svg>
+        <h2 class="popup-title">VisionText OCR</h2>
+    </div>
+
+    <!-- Main Button -->
+    <button id="ocrFloarBtn" class="primary-btn">Enable OCR Mode</button>
+
+    <!-- Hint -->
+    <p class="hint">Click the button, then click-and-drag on the page to select an area.</p>
+
+    <!-- Footer -->
     <div class="popup-foot">
-        <small>Backend: <code>http://localhost:8080/api/ocr/base64</code></small>
+        <small>
+            <span class="backend-label">Website: </span>
+            <a id="backendUrl" href="http://localhost:8080" target="_blank">
+                http://localhost:8080
+            </a>
+        </small>
     </div>
 </div>
+
 <script src="popup.js"></script>
 </body>
 </html>
