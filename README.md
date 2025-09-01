@@ -140,7 +140,7 @@ sequenceDiagram
    - Optimized for web page text
    - Standard processing for HTML content
 
-3. 🖼️ Image OCR 
+3. 🖼️ Image OCR
    - 5x scaling for maximum quality
    - Advanced image sharpening
    - Adaptive thresholding for clear text
