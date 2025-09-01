@@ -392,7 +392,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 });
 ```
 
-## 🚀 Deployment Issues
+## 🚀 Extension Issues
 
 ### Issue #9: CORS Configuration
 
@@ -417,6 +417,78 @@ public class OcrController {
 ```java
 @CrossOrigin(origins = {"https://yourdomain.com", "chrome-extension://*"})
 ```
+
+## OCR Text Extracting
+
+### Issue #10: After OCR button click, text is not extracted from image properly
+
+**Date* September 01, 2025  
+**Severity**: High  
+**Status**: ✅ Resolved
+
+**Solution**: Rewriting content.js, Simplifying backround.js, improve OCR accuracy
+
+- Rewriting content.js with a simpler, more reliable approach based on "web-select" (open sorce ocr) repo pattern
+- Simplifying background.js to just capture screenshots without complex processing
+
+```javascript
+// background.js - Simple screenshot capture
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'capture') {
+        chrome.tabs.captureVisibleTab(null, { format: 'png' }, (dataUrl) => {
+            if (chrome.runtime.lastError) {
+                sendResponse({ error: chrome.runtime.lastError.message });
+            } else {
+                sendResponse({ imageBase64: dataUrl });
+            }
+        });
+        return true;
+    }
+});
+```
+
+- Adding image preprocessing to improve OCR accuracy for images and videos
+- 
+```javascript
+function cropImage(dataUrl, rect) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Scale up for better OCR accuracy
+                const scale = 3;
+                canvas.width = rect.width * scale;
+                canvas.height = rect.height * scale;
+                
+                // Draw scaled image
+                ctx.drawImage(img, rect.x, rect.y, rect.width, rect.height, 0, 0, canvas.width, canvas.height);
+                
+                // Apply image enhancements for better OCR
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                
+                // Convert to grayscale and increase contrast
+                for (let i = 0; i < data.length; i += 4) {
+                    const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+                    // Increase contrast
+                    const contrast = ((gray - 128) * 1.5) + 128;
+                    const final = Math.max(0, Math.min(255, contrast));
+                    
+                    data[i] = final;     // Red
+                    data[i + 1] = final; // Green
+                    data[i + 2] = final; // Blue
+                }
+                
+                ctx.putImageData(imageData, 0, 0);
+                resolve(canvas.toDataURL('image/png'));
+            };
+            img.src = dataUrl;
+        });
+    }
+```
+---
 
 ## 📊 Issue Statistics
 

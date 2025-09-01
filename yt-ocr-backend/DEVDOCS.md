@@ -484,6 +484,30 @@ public class OcrController {
   }
 ```
 
+#### 6. OCR Text Extracting (Date: september 01 2025)
+#### Issue #10: *After OCR button click, text is not extracted from image properly*
+
+**solution**: Rewriting content.js and simplifying background.js, add image enhancement for better OCR accuracy.
+
+- rewritten the extension using a simpler approach inspired by the web-select repo. Key changes:
+  1. Simpler Selection: Uses overlay with mouse events like web-select
+  2. Direct Cropping: Crops image using canvas coordinates directly
+  3. Cleaner Code: Removed complex coordinate scaling logic
+  4. Better Error Handling: Clear error messages and notifications
+
+
+- The new implementation:
+  1. Creates a full-screen overlay for selection
+  2. Uses client coordinates (no complex scaling)
+  3. Crops the image directly with canvas
+  4. Shows notifications for results
+
+
+- Adding image preprocessing to improve OCR accuracy for images and videos
+  - Scale up the image 3x - This gives Tesseract more pixels to work with
+  - Convert to grayscale - Removes color distractions
+  - Increase contrast - Makes text edges sharper
+
 ### Debug Workflow
 ```mermaid
 flowchart TD
