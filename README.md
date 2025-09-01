@@ -128,6 +128,22 @@ sequenceDiagram
     E->>U: Copy to clipboard & show in popup
     E->>E: Store in session history
 ```
+## Tri specialized OCR modes:
+
+1. 🎯 Video OCR 
+   - YouTube caption detection for instant accuracy
+   - High-quality video frame extraction
+   - Auto-pause for clearer frames
+
+2. 🌐 Web Text 
+   - Detects already selected text first
+   - Optimized for web page text
+   - Standard processing for HTML content
+
+3. 🖼️ Image OCR 
+   - 5x scaling for maximum quality
+   - Advanced image sharpening
+   - Adaptive thresholding for clear text
 
 ## 🔄 API Endpoints
 

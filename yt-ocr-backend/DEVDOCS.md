@@ -392,11 +392,6 @@ flowchart LR
     G[Request 3] --> E
 ```
 
-**Performance Improvements:**
-- **Cold Start**: 3000ms → 500ms (83% improvement)
-- **Warm Processing**: 2000ms → 800ms (60% improvement)
-- **Memory Usage**: 150MB → 80MB (47% reduction)
-
 ### Tesseract Configuration
 ```java
 private ITesseract newEngine() {
@@ -461,7 +456,7 @@ public class OcrController {
 
 **Solution**: imporved manifest and background.js
 -  For Edge/Brave: 
-   - Go to edge://extensions → enable Developer Mode, and follow same steops as Chrome
+   - Go to edge://extensions → enable Developer Mode, and follow same steps as Chrome
 - Only Brave:
   - Trackers & ads blocking(For Localhost) : Disabled
   - Upgrade connections to HTTPS : Disabled
@@ -488,6 +483,8 @@ public class OcrController {
 #### Issue #10: *After OCR button click, text is not extracted from image properly*
 
 **solution**: Rewriting content.js and simplifying background.js, add image enhancement for better OCR accuracy.
+- taken some preference from open source "web-select" repo
+
 
 - rewritten the extension using a simpler approach inspired by the web-select repo. Key changes:
   1. Simpler Selection: Uses overlay with mouse events like web-select
@@ -507,6 +504,51 @@ public class OcrController {
   - Scale up the image 3x - This gives Tesseract more pixels to work with
   - Convert to grayscale - Removes color distractions
   - Increase contrast - Makes text edges sharper
+
+### Date september 01 2025
+### New Approach for OCR text extraction, 
+- inspire from "Copy Text from Video extension working"
+
+#### What’s happening in that extension
+- When we pause a YouTube video and their tool highlights text:
+
+1. Frame extraction:
+   - Instead of just screen-snipping, they grab the raw video frame (canvas snapshort) at the exact pause point.
+
+2. Image preprocessing (before OCR):
+   - Inverts contrast (background → white, text → black).
+   - Slightly sharpens + zooms that region (so OCR sees crisp letters).
+   - Sometimes applies binarization (turning grayscale into pure black/white).
+
+3. OCR bypass (sometimes):
+   - For YouTube, Google has captions baked in. Some extensions can directly pull captions/subtitles instead of doing OCR — instant and 100% accurate.
+
+4. UI trick:
+   - They overlay a styled transparent div that shows a “popped out” text effect (white bg, black text) so you feel like it’s extracting the text instantly.
+
+### Implementation of new content.js
+
+1. Detect if a (video) is present on the page
+  - When user presses OCR button, before enabling drag-select, check:
+
+2. Grab raw video frame (instead of screen pixels)
+   - This gives you full-quality frame from video (not fuzzy screen pixels). 
+
+3. Apply preprocessing for sharper text
+   - Before sending to OCR, boost contrast + brightness: This makes text pop out (similar to the “white bg + black font” effect you saw).
+
+4. YouTube captions if available
+
+5. Update your popup button
+
+### Seprating Logic for Video,Image,Web Text Selection for OCR
+
+- Adding dropdown OCR mode selection in content.js for video, web text, and image processing
+- Updating selection and OCR functions to handle different modes with optimized processing
+- Adding high-quality image processing function for better OCR on images
+
+
+---
 
 ### Debug Workflow
 ```mermaid

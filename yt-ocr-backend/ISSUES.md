@@ -448,7 +448,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 ```
 
 - Adding image preprocessing to improve OCR accuracy for images and videos
-- 
+
 ```javascript
 function cropImage(dataUrl, rect) {
         return new Promise((resolve) => {
@@ -488,6 +488,7 @@ function cropImage(dataUrl, rect) {
         });
     }
 ```
+
 ---
 
 ## 📊 Issue Statistics
