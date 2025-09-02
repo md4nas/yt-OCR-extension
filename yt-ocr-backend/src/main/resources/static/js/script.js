@@ -1,4 +1,4 @@
-let rows = [];
+let rows = []; // store current OCR result
 let historyData = JSON.parse(sessionStorage.getItem("ocrHistory")) || [];
 
 // Preview Image
@@ -106,7 +106,7 @@ function clearResults() {
     document.getElementById("processingTime").textContent = "";
 }
 
-// History management
+// Enhanced History with sessionStorage
 function saveToHistory(rows) {
     const extractedText = rows.map(r => r.content).join("\n");
     const entry = {
@@ -124,14 +124,14 @@ function saveToHistory(rows) {
 
 function renderHistory() {
     const historyList = document.getElementById("historyList");
-    if (!historyList) return;
-    
     historyList.innerHTML = "";
+
     historyData.forEach((item, index) => {
         const li = document.createElement("li");
+        // Fix undefined issue by ensuring all properties exist
         const runId = item.id || (index + 1);
         const time = item.time || 'Unknown time';
-        const lineCount = item.lineCount || 0;
+        const lineCount = item.lineCount || (item.content ? item.content.split('\n').length : 0);
         
         li.innerHTML = `
           <div class="history-item">
@@ -143,10 +143,17 @@ function renderHistory() {
     });
 }
 
+function reloadHistory() {
+    // Reload history from sessionStorage
+    historyData = JSON.parse(sessionStorage.getItem("ocrHistory")) || [];
+    renderHistory();
+    alert('History reloaded!');
+}
+
 function viewHistory(id) {
     const item = historyData.find((h, index) => (h.id || (index + 1)) === id);
     if (item) {
-        const content = item.content || 'No content available';
+        const content = item.content || item.text || 'No content available';
         document.getElementById("historyText").innerText = content;
         document.getElementById("historyModal").style.display = "block";
     }
@@ -154,6 +161,14 @@ function viewHistory(id) {
 
 function closeModal() {
     document.getElementById("historyModal").style.display = "none";
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById("historyModal");
+    if (event.target === modal) {
+        closeModal();
+    }
 }
 
 function copyHistoryText() {
@@ -166,14 +181,6 @@ function clearHistory() {
     historyData = [];
     sessionStorage.removeItem("ocrHistory");
     renderHistory();
-}
-
-// Close modal when clicking outside
-window.onclick = function(event) {
-    const modal = document.getElementById("historyModal");
-    if (event.target === modal) {
-        closeModal();
-    }
 }
 
 // Load history on start

@@ -39,8 +39,7 @@ public class OcrResponse {
                     int lineNo = Integer.parseInt(line.substring(0, dotIndex));
                     String content = line.substring(dotIndex + 2);
                     rows.add(new TextRow(lineNo, content));
-                }
-                else {
+                } else {
                     rows.add(new TextRow(rows.size() + 1, line));
                 }
             }
