@@ -30,7 +30,8 @@ public class OcrController {
     @PostMapping(value="/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<OcrResponse> extractFromFile(
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "language", defaultValue = "eng") String language) {
+            @RequestParam(value = "language", defaultValue = "eng") String language,
+            @RequestParam(value = "mode", defaultValue = "auto") String mode) {
         
         long startTime = System.currentTimeMillis();
         File tmp = null;
@@ -53,7 +54,7 @@ public class OcrController {
             
             tmp = File.createTempFile("ocr_",".img");
             file.transferTo(tmp);
-            String text = ocrService.doOcr(tmp, language);
+            String text = ocrService.doOcr(tmp, language, mode);
             
             long processingTime = System.currentTimeMillis() - startTime;
             return ResponseEntity.ok(new OcrResponse(text, processingTime));
@@ -89,7 +90,7 @@ public class OcrController {
                 return ResponseEntity.badRequest().body(response);
             }
             
-            String text = ocrService.doOcr(tmp, req.getLanguage());
+            String text = ocrService.doOcr(tmp, req.getLanguage(), req.getMode() != null ? req.getMode() : "auto");
             long processingTime = System.currentTimeMillis() - startTime;
             return ResponseEntity.ok(new OcrResponse(text, processingTime));
             
