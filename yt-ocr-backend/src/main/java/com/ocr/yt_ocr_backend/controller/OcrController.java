@@ -3,6 +3,7 @@ package com.ocr.yt_ocr_backend.controller;
 import com.ocr.yt_ocr_backend.dto.OcrBase64Request;
 import com.ocr.yt_ocr_backend.dto.OcrResponse;
 import com.ocr.yt_ocr_backend.service.OcrService;
+import com.ocr.yt_ocr_backend.service.ImageEnhancementService;
 import com.ocr.yt_ocr_backend.util.ImageUtils;
 import net.sourceforge.tess4j.TesseractException;
 import org.springframework.http.MediaType;
@@ -11,15 +12,18 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/ocr")
 @CrossOrigin(origins = "*")
 public class OcrController {
     private final OcrService ocrService;
+    private final ImageEnhancementService imageEnhancementService;
 
-    public OcrController(OcrService ocrService) {
+    public OcrController(OcrService ocrService, ImageEnhancementService imageEnhancementService) {
         this.ocrService = ocrService;
+        this.imageEnhancementService = imageEnhancementService;
     }
 
     //1. Multipart endpoint
@@ -94,6 +98,39 @@ public class OcrController {
             OcrResponse response = new OcrResponse("OCR Failed: " + te.getMessage(), processingTime);
             response.setStatus("ocr_failed");
             return ResponseEntity.badRequest().body(response);
+        } catch (Exception e) {
+            long processingTime = System.currentTimeMillis() - startTime;
+            OcrResponse response = new OcrResponse("Error: " + e.getMessage(), processingTime);
+            response.setStatus("error");
+            return ResponseEntity.badRequest().body(response);
+        } finally {
+            if (tmp != null) tmp.delete();
+        }
+    }
+
+    //3. Enhanced OCR endpoint for extension modes
+    @PostMapping(value = "/enhanced", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<OcrResponse> enhancedOcr(@RequestBody Map<String, String> request) {
+        long startTime = System.currentTimeMillis();
+        File tmp = null;
+        
+        try {
+            String base64Image = request.get("imageBase64");
+            String mode = request.getOrDefault("mode", "web");
+            String language = request.getOrDefault("language", "eng");
+            
+            // Enhance image based on mode
+            String enhancedImage = imageEnhancementService.enhanceForOCR(base64Image, mode);
+            
+            // Convert to temp file for OCR
+            tmp = ImageUtils.base64ToTempPng(enhancedImage);
+            
+            // Perform OCR
+            String text = ocrService.doOcr(tmp, language);
+            
+            long processingTime = System.currentTimeMillis() - startTime;
+            return ResponseEntity.ok(new OcrResponse(text, processingTime));
+            
         } catch (Exception e) {
             long processingTime = System.currentTimeMillis() - startTime;
             OcrResponse response = new OcrResponse("Error: " + e.getMessage(), processingTime);

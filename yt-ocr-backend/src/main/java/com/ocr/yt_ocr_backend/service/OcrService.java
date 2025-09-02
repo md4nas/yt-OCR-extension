@@ -55,13 +55,22 @@ public class OcrService {
         tesseract.setDatapath(resolvePath);
         tesseract.setLanguage(language);
 
-        // Balanced settings for accuracy and speed
-        tesseract.setPageSegMode(6);
-        tesseract.setOcrEngineMode(1);
+        // High accuracy LSTM-only settings
+        tesseract.setPageSegMode(6); // Uniform block of text (most reliable)
+        tesseract.setOcrEngineMode(1); // LSTM only (avoids legacy engine issues)
+        
+        // Quality settings for LSTM engine
+        tesseract.setTessVariable("preserve_interword_spaces", "1");
+        tesseract.setTessVariable("tessedit_char_blacklist", "");
+        tesseract.setTessVariable("tessedit_write_images", "0");
+        tesseract.setTessVariable("user_defined_dpi", "300");
+        
+        // Disable outputs for focus
         tesseract.setVariable("tessedit_create_hocr", "0");
         tesseract.setVariable("tessedit_create_pdf", "0");
         tesseract.setVariable("tessedit_create_tsv", "0");
 
+        // Allow all characters for maximum detection
         if (charWhitelist != null && !charWhitelist.isBlank()){
             tesseract.setTessVariable("tessedit_char_whitelist", charWhitelist);
         }
@@ -84,8 +93,7 @@ public class OcrService {
                 throw new RuntimeException("Image could not decode the file. Unsupported Format");
             }
 
-            // Optimize image for faster processing
-            img = optimizeImage(img);
+            // Keep original image quality for better accuracy
             
             String rawText = tesseractEngine.doOCR(img);
             return processOcrText(rawText);
@@ -95,32 +103,32 @@ public class OcrService {
         }
     }
 
-    // Post-processing of OCR text
+    // Simple text processing like original working version
     private String processOcrText(String rawText) {
         if (rawText == null || rawText.trim().isEmpty()) {
-            return "No text detected";
+            return "";
         }
 
-        // Simplified processing for speed
-        String processed = rawText
-                .replaceAll("[|]", "I")
-                .replaceAll("(?<=[a-z])(?=[A-Z])", " ")
-                .replaceAll("\\s+", " ")
-                .trim();
-
-        // Split into sentences for better readability
-        String[] sentences = processed.split("(?<=[.!?])\\s+");
-        StringBuilder sb = new StringBuilder();
-
-        int lineNumber = 1;
-        for (String sentence : sentences) {
-            sentence = sentence.trim();
-            if (!sentence.isEmpty() && sentence.length() > 3) {
-                sb.append(lineNumber++).append(". ").append(sentence).append("\n");
+        // Clean up spacing and normalize
+        String cleaned = rawText.replaceAll("[ ]{2,}", " ").trim();
+        
+        // Split into lines and add numbering
+        String[] lines = cleaned.split("\\r?\\n");
+        StringBuilder formatted = new StringBuilder();
+        
+        int row = 1;
+        for (String line : lines) {
+            line = line.trim();
+            if (!line.isEmpty()) {
+                formatted.append(row++).append(". ").append(line);
+                // Add proper line break (not literal \n)
+                if (row <= lines.length) {
+                    formatted.append(System.lineSeparator());
+                }
             }
         }
-
-        return sb.toString();
+        
+        return formatted.toString();
     }
 
     private String processLine(String line) {
@@ -144,24 +152,5 @@ public class OcrService {
         return line;
     }
 
-    private BufferedImage optimizeImage(BufferedImage original) {
-        // Only resize if extremely large (over 3000px width)
-        int width = original.getWidth();
-        int height = original.getHeight();
-        
-        if (width > 3000) {
-            double scale = 3000.0 / width;
-            width = 3000;
-            height = (int) (height * scale);
-            
-            BufferedImage resized = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-            Graphics2D g2d = resized.createGraphics();
-            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-            g2d.drawImage(original, 0, 0, width, height, null);
-            g2d.dispose();
-            return resized;
-        }
-        
-        return original;
-    }
+
 }
