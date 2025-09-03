@@ -1,8 +1,22 @@
-# 🤝 Contributing to YT-OCR Backend
+# Contributing to VisionText OCR
 
-Thank you for your interest in contributing to the YT-OCR Backend project! We welcome contributions from developers, designers, and OCR enthusiasts.
+Thank you for your interest in contributing to the VisionText OCR project! We welcome contributions from developers, designers, and OCR enthusiasts.
 
-## 🎨 Project Architecture Overview
+## Table of Contents
+
+- [Project Architecture Overview](#project-architecture-overview)
+- [How to Contribute](#how-to-contribute)
+- [Development Setup](#development-setup)
+- [Code Style Guidelines](#code-style-guidelines)
+- [Testing](#testing)
+- [Pull Request Process](#pull-request-process)
+- [Code Review Process](#code-review-process)
+- [Areas for Contribution](#areas-for-contribution)
+- [Development Workflow](#development-workflow)
+- [Getting Help](#getting-help)
+- [Recognition](#recognition)
+
+## Project Architecture Overview
 
 ```mermaid
 flowchart TD
@@ -34,7 +48,7 @@ flowchart TD
     D --> J
 ```
 
-## 🤝 How to Contribute
+## How to Contribute
 
 ### Reporting Issues
 - Use the GitHub issue tracker to report bugs
@@ -55,7 +69,7 @@ flowchart TD
 - Git
 - Chrome/Edge browser for testing
 
-#### 🔧 Development Setup
+## Development Setup
 
 ```mermaid
 flowchart LR
@@ -69,7 +83,7 @@ flowchart LR
 
 1. **Fork and Clone**
    ```bash
-   git clone https://github.com/your-username/yt-ocr-backend.git
+   git clone https://github.com/your-username/yt-OCR-extension.git
    cd yt-ocr-backend
    ```
 
@@ -102,14 +116,39 @@ flowchart LR
    git checkout -b feature/your-feature-name
    ```
 
-#### Making Changes
+### Making Changes
 1. Make your changes in the appropriate files
 2. Follow the existing code style and conventions
 3. Add tests for new functionality
 4. Update documentation if needed
 5. Test your changes thoroughly
 
-#### 🧪 Testing Workflow
+## Code Style Guidelines
+
+### Java Code
+- Follow standard Java naming conventions
+- Use meaningful variable and method names
+- Add JavaDoc comments for public methods
+- Keep methods focused and concise
+- Handle exceptions appropriately
+- Use proper logging levels
+
+### JavaScript Code
+- Use camelCase for variables and functions
+- Add comments for complex logic
+- Follow async/await patterns
+- Handle errors gracefully
+- Use const/let instead of var
+
+### CSS
+- Use meaningful class names
+- Follow BEM methodology where applicable
+- Keep styles organized and commented
+- Use CSS custom properties for theming
+
+## Testing
+
+### Testing Workflow
 
 ```mermaid
 flowchart LR
@@ -163,15 +202,19 @@ mvn test jacoco:report
 - Performance benchmarking
 
 **Test Cases to Cover**
-- [ ] File upload functionality
-- [ ] Base64 image processing
-- [ ] Extension screen capture
-- [ ] Text extraction accuracy
-- [ ] Error handling scenarios
-- [ ] Performance under load
-- [ ] Cross-site compatibility
+- File upload functionality
+- Base64 image processing
+- Extension screen capture
+- Text extraction accuracy
+- Error handling scenarios
+- Performance under load
+- Cross-site compatibility
+- Mode-specific preprocessing
+- Line separation functionality
 
-#### Submitting Changes
+## Pull Request Process
+
+### Submitting Changes
 1. Commit your changes:
    ```bash
    git add .
@@ -186,29 +229,7 @@ mvn test jacoco:report
    - Reference any related issues
    - Screenshots/demos if applicable
 
-## 📝 Code Style Guidelines
-
-### Java Code
-- Follow standard Java naming conventions
-- Use meaningful variable and method names
-- Add JavaDoc comments for public methods
-- Keep methods focused and concise
-- Handle exceptions appropriately
-
-### JavaScript Code
-- Use camelCase for variables and functions
-- Add comments for complex logic
-- Follow async/await patterns
-- Handle errors gracefully
-- Use const/let instead of var
-
-### CSS
-- Use meaningful class names
-- Follow BEM methodology where applicable
-- Keep styles organized and commented
-- Use CSS custom properties for theming
-
-## 🐛 Bug Reports
+### Bug Reports
 
 When reporting bugs, please include:
 - **Description**: Clear description of the issue
@@ -218,8 +239,9 @@ When reporting bugs, please include:
 - **Environment**: OS, Java version, browser version
 - **Screenshots**: If applicable
 - **Error Logs**: Console errors or stack traces
+- **OCR Mode**: Which mode was being used (video/web/image)
 
-## 💡 Feature Requests
+### Feature Requests
 
 For feature requests, please provide:
 - **Use Case**: Why is this feature needed?
@@ -227,19 +249,21 @@ For feature requests, please provide:
 - **Mockups**: UI mockups if applicable
 - **Implementation Ideas**: Any thoughts on implementation
 
-## 📋 Pull Request Checklist
+### Pull Request Checklist
 
 Before submitting a PR, ensure:
-- [ ] Code follows project style guidelines
-- [ ] Tests pass (`mvn test`)
-- [ ] New features include tests
-- [ ] Documentation is updated
-- [ ] Chrome extension works correctly
-- [ ] Web interface functions properly
-- [ ] No console errors or warnings
-- [ ] Commit messages are clear and descriptive
+- Code follows project style guidelines
+- Tests pass (`mvn test`)
+- New features include tests
+- Documentation is updated
+- Chrome extension works correctly
+- Web interface functions properly
+- No console errors or warnings
+- Commit messages are clear and descriptive
+- OCR accuracy is maintained or improved
+- Performance is not degraded
 
-## 🔍 Code Review Process
+## Code Review Process
 
 ```mermaid
 flowchart TD
@@ -280,15 +304,111 @@ flowchart TD
    - Performance optimization tips
    - Best practice recommendations
 
-## 📚 Development Resources
+## Areas for Contribution
 
-### Useful Links
+### Contribution Priority Distribution
+```mermaid
+pie title Contribution Areas by Priority
+    "Performance Optimization" : 25
+    "Language Support" : 20
+    "UI/UX Improvements" : 15
+    "Error Handling" : 15
+    "Documentation" : 10
+    "Testing" : 10
+    "Accessibility" : 5
+```
+
+We especially welcome contributions in these areas:
+- **Performance Optimization**: Improve OCR processing speed
+- **Language Support**: Add support for more languages
+- **UI/UX Improvements**: Enhance user interface and experience
+- **Error Handling**: Better error messages and recovery
+- **Documentation**: Improve guides and API documentation
+- **Testing**: Add more comprehensive tests
+- **Accessibility**: Make the interface more accessible
+- **Mode-Specific Enhancements**: Improve preprocessing for different OCR modes
+
+## Development Workflow
+
+### Feature Development
+1. **Planning**: Discuss feature in GitHub issues
+2. **Design**: Create technical design document
+3. **Implementation**: Code with tests and documentation
+4. **Review**: Code review and feedback
+5. **Testing**: Comprehensive testing across modes
+6. **Deployment**: Merge and release
+
+### Bug Fixes
+1. **Reproduction**: Confirm and reproduce the bug
+2. **Root Cause**: Identify the underlying issue
+3. **Fix**: Implement minimal fix with tests
+4. **Verification**: Ensure fix works and doesn't break other features
+5. **Documentation**: Update relevant documentation
+
+### Release Process
+```mermaid
+flowchart TD
+    A[Version Planning] --> B[Feature Freeze]
+    B --> C[Testing Phase]
+    C --> D{All Tests Pass?}
+    D -->|No| E[Fix Issues]
+    E --> C
+    D -->|Yes| F[Documentation Update]
+    F --> G[Create Release]
+    G --> H[Deploy Production]
+    H --> I[Monitor & Support]
+```
+
+1. **Version Planning**: Determine version number (major/minor/patch)
+2. **Testing**: Full regression testing
+3. **Documentation**: Update CHANGELOG.md and version numbers
+4. **Release**: Tag version and create release notes
+5. **Deployment**: Deploy to production environment
+
+### Skill Requirements by Area
+```mermaid
+quadrantChart
+    title Contribution Areas by Skill Level
+    x-axis Low Complexity --> High Complexity
+    y-axis Low Impact --> High Impact
+    quadrant-1 High Impact, High Complexity
+    quadrant-2 High Impact, Low Complexity
+    quadrant-3 Low Impact, Low Complexity
+    quadrant-4 Low Impact, High Complexity
+    
+    Performance Optimization: [0.8, 0.9]
+    Language Support: [0.6, 0.8]
+    UI/UX Improvements: [0.4, 0.7]
+    Documentation: [0.2, 0.6]
+    Testing: [0.3, 0.5]
+    Bug Fixes: [0.5, 0.4]
+    Accessibility: [0.3, 0.3]
+```
+
+## Getting Help
+
+If you need help with contributing:
+- Open an issue with the "question" label
+- Check existing issues and discussions
+- Contact the maintainer: md.anas1028@gmail.com
+- Check [DEVDOCS.md](DEVDOCS.md) for technical details
+
+## Recognition
+
+Contributors will be recognized in:
+- README.md contributors section
+- Release notes for significant contributions
+- GitHub contributors page
+
+### Development Resources
+
+#### Useful Links
 - [Spring Boot Documentation](https://spring.io/projects/spring-boot)
 - [Tesseract OCR](https://github.com/tesseract-ocr/tesseract)
 - [Chrome Extension API](https://developer.chrome.com/docs/extensions/)
 - [Tess4J Documentation](https://github.com/nguyenq/tess4j)
 
-### Project Structure
+#### Project Structure
 ```
 src/main/java/com/ocr/yt_ocr_backend/
 ├── controller/     # REST API endpoints
@@ -302,29 +422,4 @@ src/main/resources/
 └── chrome-extension/  # Extension files
 ```
 
-## 🎯 Areas for Contribution
-
-We especially welcome contributions in these areas:
-- **Performance Optimization**: Improve OCR processing speed
-- **Language Support**: Add support for more languages
-- **UI/UX Improvements**: Enhance user interface and experience
-- **Error Handling**: Better error messages and recovery
-- **Documentation**: Improve guides and API documentation
-- **Testing**: Add more comprehensive tests
-- **Accessibility**: Make the interface more accessible
-
-## 📞 Getting Help
-
-If you need help with contributing:
-- Open an issue with the "question" label
-- Check existing issues and discussions
-- Contact the maintainer: md.anas1028@gmail.com
-
-## 🏆 Recognition
-
-Contributors will be recognized in:
-- README.md contributors section
-- Release notes for significant contributions
-- GitHub contributors page
-
-Thank you for helping make OCR Text Extractor better! 🚀
+Thank you for helping make VisionText OCR better!
