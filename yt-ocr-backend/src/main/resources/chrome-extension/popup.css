@@ -157,3 +157,43 @@ body {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* Popup Donation Section */
+.popup-donate {
+    margin: 16px 0;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.donate-text {
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    opacity: 0.9;
+    color: white;
+}
+
+.donate-popup-btn {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+    border: none;
+    border-radius: 15px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin: 0 auto;
+    min-width: 80px;
+}
+
+.donate-popup-btn:hover {
+    background: linear-gradient(135deg, #ee5a24, #d63031);
+    transform: translateY(-1px);
+}
