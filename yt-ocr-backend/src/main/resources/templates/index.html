@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+    <meta http-equiv="X-Frame-Options" content="DENY"/>
     <title>VisionText OCR - Extract Text from Images</title>
     <link rel="stylesheet" href="/css/style.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -23,8 +25,18 @@
 
     <!-- Upload Section -->
     <div class="upload-section">
-        <input type="file" id="fileInput" accept="image/*"/>
-        <button onclick="recapture()">Recapture</button>
+        <div class="upload-controls">
+            <input type="file" id="fileInput" accept="image/*"/>
+            <button onclick="recapture()">Recapture</button>
+            <div class="mode-selection-inline">
+                <label>OCR Mode:</label>
+                <select id="ocrMode">
+                    <option value="auto">Auto</option>
+                    <option value="code">Code/Programming</option>
+                    <option value="text">Regular Text</option>
+                </select>
+            </div>
+        </div>
     </div>
 
     <!-- Preview -->
@@ -136,6 +148,24 @@
                 </div>
                 <div class="faq-answer">
                     <p>After installing the extension, simply click the extension icon and select "Capture Screen" to extract text from any part of your screen or webpage.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Why does OCR processing take time?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>OCR processing involves multiple steps: capturing your image in real-time, sending it to our backend server for AI analysis, and returning the extracted text. Processing time depends on image size, complexity, and server load. Typically takes 2-5 seconds for optimal results.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Why is some text cut off or missing?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>If text appears cropped or incomplete, try selecting a larger area around the text you want to capture. Ensure the entire text block is within your selection boundaries and avoid cutting off words at the edges for better accuracy.</p>
                 </div>
             </div>
         </div>

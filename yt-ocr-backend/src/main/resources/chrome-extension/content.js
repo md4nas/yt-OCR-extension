@@ -1,16 +1,22 @@
-// content.js - Simple OCR selection implementation
+// content.js - Secure OCR selection implementation
 (function() {
     'use strict';
     
     if (window.ocrInjected) return;
     window.ocrInjected = true;
     
-    const OCR_API = 'http://localhost:8080/api/ocr/base64';
+    const OCR_API = 'http://localhost:9090/api/ocr/base64';
     
     let isEnabled = false;
     let isSelecting = false;
     let startX, startY, endX, endY;
     let overlay, selection;
+    
+    // Sanitize text input
+    function sanitizeText(text) {
+        if (typeof text !== 'string') return '';
+        return text.replace(/[<>"'&]/g, '');
+    }
     
     // Create OCR button with dropdown
     const ocrContainer = document.createElement('div');
@@ -58,8 +64,8 @@
     modes.forEach(mode => {
         const option = document.createElement('div');
         option.className = 'ocr-option';
-        option.dataset.mode = mode.id;
-        option.textContent = mode.text;
+        option.dataset.mode = sanitizeText(mode.id);
+        option.textContent = sanitizeText(mode.text);
         option.style.cssText = `
             padding: 10px 15px !important;
             cursor: pointer !important;
@@ -80,19 +86,30 @@
     ocrContainer.appendChild(dropdown);
     document.body.appendChild(ocrContainer);
     
-    // Check initial state
-    chrome.storage.local.get(['ocrEnabled'], (result) => {
-        isEnabled = result.ocrEnabled || false;
-        ocrContainer.style.display = isEnabled ? 'block' : 'none';
-    });
-    
-    // Listen for toggle messages
-    chrome.runtime.onMessage.addListener((request) => {
-        if (request.action === 'toggleOCR') {
-            isEnabled = request.enabled;
+    // Check initial state with error handling
+    try {
+        chrome.storage.local.get(['ocrEnabled'], (result) => {
+            isEnabled = result.ocrEnabled || false;
             ocrContainer.style.display = isEnabled ? 'block' : 'none';
-        }
-    });
+        });
+    } catch (e) {
+        console.warn('Chrome storage access failed:', e);
+    }
+    
+    // Listen for toggle messages with error handling
+    try {
+        chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+            console.log('Content script received message:', request);
+            if (request && request.action === 'toggleOCR') {
+                isEnabled = Boolean(request.enabled);
+                ocrContainer.style.display = isEnabled ? 'block' : 'none';
+                console.log('OCR container display set to:', isEnabled ? 'block' : 'none');
+                sendResponse({success: true});
+            }
+        });
+    } catch (e) {
+        console.warn('Chrome runtime message listener failed:', e);
+    }
     
     let currentMode = 'video';
     let dropdownVisible = false;
@@ -106,8 +123,8 @@
     
     // Mode selection
     dropdown.addEventListener('click', (e) => {
-        if (e.target.classList.contains('ocr-option')) {
-            currentMode = e.target.dataset.mode;
+        if (e.target && e.target.classList.contains('ocr-option')) {
+            currentMode = sanitizeText(e.target.dataset.mode) || 'video';
             dropdown.style.display = 'none';
             dropdownVisible = false;
             ocrBtn.textContent = 'OCR ▼';
@@ -128,7 +145,7 @@
         if (isSelecting) return;
         
         isSelecting = true;
-        currentMode = mode;
+        currentMode = sanitizeText(mode) || 'video';
         ocrBtn.textContent = 'Cancel';
         document.body.style.cursor = 'crosshair';
         
@@ -165,6 +182,8 @@
     function onMouseDown(e) {
         startX = e.clientX;
         startY = e.clientY;
+        endX = startX; // Initialize endX and endY
+        endY = startY;
         selection.style.display = 'block';
         selection.style.left = startX + 'px';
         selection.style.top = startY + 'px';
@@ -190,7 +209,7 @@
     }
     
     function onMouseUp(e) {
-        if (!startX) return;
+        if (!startX || !endX || !endY) return;
         
         const rect = {
             x: Math.min(startX, endX),
@@ -214,10 +233,10 @@
     
     function endSelection() {
         isSelecting = false;
-        ocrBtn.textContent = 'OCR';
+        ocrBtn.textContent = 'OCR ▼';
         document.body.style.cursor = '';
         
-        if (overlay) {
+        if (overlay && overlay.parentNode) {
             overlay.remove();
             overlay = null;
         }
@@ -228,261 +247,102 @@
     
     async function captureAndOCR(rect, mode) {
         try {
-            // Mode-specific processing
-            if (mode === 'video') {
-                // Try YouTube captions first
-                if (window.location.hostname.includes('youtube.com')) {
-                    const captionText = getYouTubeCaptions();
-                    if (captionText) {
-                        await navigator.clipboard.writeText(captionText);
-                        showNotification('Caption text copied!');
-                        return;
-                    }
-                }
-            } else if (mode === 'web') {
-                // Try to get selected text first
-                const selectedText = window.getSelection().toString().trim();
-                if (selectedText) {
-                    await navigator.clipboard.writeText(selectedText);
-                    showNotification('Selected text copied!');
-                    return;
-                }
-            }
+            showNotification('Processing ' + sanitizeText(mode) + ' text...');
             
-            let imageData;
-            
-            if (mode === 'video') {
-                const video = getVideoInArea(rect);
-                if (video) {
-                    if (!video.paused) {
-                        video.pause();
-                        await new Promise(resolve => setTimeout(resolve, 100));
-                    }
-                    imageData = captureVideoFrame(video, rect);
-                    showNotification('Processing video text...');
-                } else {
-                    showNotification('No video found in selection');
-                    return;
-                }
-            } else {
-                // Web text or image mode - use screenshot
-                const response = await new Promise((resolve) => {
+            // Capture screenshot with error handling
+            let response;
+            try {
+                response = await new Promise((resolve, reject) => {
                     chrome.runtime.sendMessage({
                         action: 'capture',
                         rect: rect
-                    }, resolve);
+                    }, (result) => {
+                        if (chrome.runtime.lastError) {
+                            reject(new Error(chrome.runtime.lastError.message));
+                        } else {
+                            resolve(result);
+                        }
+                    });
                 });
-                
-                if (!response || !response.imageBase64) {
-                    showNotification('Failed to capture screenshot');
-                    return;
-                }
-                
-                if (mode === 'image') {
-                    imageData = await cropImageHighQuality(response.imageBase64, rect);
-                } else {
-                    imageData = await cropImage(response.imageBase64, rect);
-                }
-                showNotification(`Processing ${mode} text...`);
+            } catch (e) {
+                throw new Error('Screenshot capture failed: ' + e.message);
             }
+            
+            if (!response || !response.imageBase64) {
+                throw new Error('Failed to capture screenshot');
+            }
+            
+            const imageData = await cropImage(response.imageBase64, rect);
             
             const ocrResult = await fetch(OCR_API, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ imageBase64: imageData })
+                body: JSON.stringify({ 
+                    imageBase64: imageData,
+                    language: 'eng',
+                    mode: 'code'
+                })
             });
+            
+            if (!ocrResult.ok) {
+                throw new Error('OCR API request failed: ' + ocrResult.status);
+            }
             
             const data = await ocrResult.json();
             
             let text = '';
-            if (data.rows && data.rows.length > 0) {
-                text = data.rows.map(row => row.content).join('\n');
+            if (data.rows && Array.isArray(data.rows) && data.rows.length > 0) {
+                text = data.rows.map(row => sanitizeText(String(row.content || ''))).join('\n');
             }
             
-            if (text) {
-                await navigator.clipboard.writeText(text);
-                showNotification('Text copied to clipboard!');
+            if (text.trim()) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    showNotification('Text copied to clipboard!');
+                } catch (e) {
+                    showNotification('Text extracted but clipboard access denied');
+                }
             } else {
                 showNotification('No text detected');
             }
             
         } catch (error) {
             console.error('OCR Error:', error);
-            showNotification('OCR failed: ' + error.message);
+            showNotification('OCR failed: ' + sanitizeText(String(error.message)));
         }
-    }
-    
-    function getYouTubeCaptions() {
-        const captions = document.querySelectorAll('.ytp-caption-segment');
-        if (captions.length > 0) {
-            return [...captions].map(el => el.innerText).join(' ');
-        }
-        return null;
-    }
-    
-    function captureVideoFrame(video, selection) {
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        return preprocessCanvas(canvas, selection);
-    }
-    
-    function preprocessCanvas(canvas, selection) {
-        const videoRect = document.querySelector('video').getBoundingClientRect();
-        const scaleX = canvas.width / videoRect.width;
-        const scaleY = canvas.height / videoRect.height;
-        
-        const cropX = (selection.x - videoRect.left) * scaleX;
-        const cropY = (selection.y - videoRect.top) * scaleY;
-        const cropW = selection.width * scaleX;
-        const cropH = selection.height * scaleY;
-        
-        const cropped = document.createElement('canvas');
-        cropped.width = cropW;
-        cropped.height = cropH;
-        
-        const ctx = cropped.getContext('2d');
-        ctx.filter = 'contrast(200%) brightness(120%)';
-        ctx.drawImage(canvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-        
-        return cropped.toDataURL('image/png');
-    }
-    
-    function cropImageHighQuality(dataUrl, rect) {
-        return new Promise((resolve) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                
-                // Higher scale for images (5x)
-                const scale = 5;
-                canvas.width = rect.width * scale;
-                canvas.height = rect.height * scale;
-                
-                ctx.drawImage(img, rect.x, rect.y, rect.width, rect.height, 0, 0, canvas.width, canvas.height);
-                
-                // Advanced image processing for better OCR
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const data = imageData.data;
-                
-                // Sharpen and enhance contrast
-                for (let i = 0; i < data.length; i += 4) {
-                    const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
-                    // Adaptive thresholding
-                    const threshold = gray > 128 ? 255 : 0;
-                    
-                    data[i] = threshold;
-                    data[i + 1] = threshold;
-                    data[i + 2] = threshold;
-                }
-                
-                ctx.putImageData(imageData, 0, 0);
-                resolve(canvas.toDataURL('image/png'));
-            };
-            img.src = dataUrl;
-        });
-    }
-    
-    function getVideoInArea(rect) {
-        const videos = document.querySelectorAll('video');
-        for (const video of videos) {
-            const videoRect = video.getBoundingClientRect();
-            if (rect.x < videoRect.right && rect.x + rect.width > videoRect.left &&
-                rect.y < videoRect.bottom && rect.y + rect.height > videoRect.top) {
-                return video;
-            }
-        }
-        return null;
-    }
-    
-    async function extractVideoFrame(video, rect) {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        
-        const videoRect = video.getBoundingClientRect();
-        const relativeX = Math.max(0, rect.x - videoRect.left);
-        const relativeY = Math.max(0, rect.y - videoRect.top);
-        const cropWidth = Math.min(rect.width, videoRect.right - rect.x);
-        const cropHeight = Math.min(rect.height, videoRect.bottom - rect.y);
-        
-        // Scale up 4x for better OCR
-        const scale = 4;
-        canvas.width = cropWidth * scale;
-        canvas.height = cropHeight * scale;
-        
-        // Draw video frame
-        ctx.drawImage(
-            video,
-            relativeX * (video.videoWidth / videoRect.width),
-            relativeY * (video.videoHeight / videoRect.height),
-            cropWidth * (video.videoWidth / videoRect.width),
-            cropHeight * (video.videoHeight / videoRect.height),
-            0, 0, canvas.width, canvas.height
-        );
-        
-        // High contrast processing for video text
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        
-        for (let i = 0; i < data.length; i += 4) {
-            const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
-            const contrast = gray > 140 ? 255 : 0; // High contrast threshold
-            
-            data[i] = contrast;
-            data[i + 1] = contrast;
-            data[i + 2] = contrast;
-        }
-        
-        ctx.putImageData(imageData, 0, 0);
-        return canvas.toDataURL('image/png');
     }
     
     function cropImage(dataUrl, rect) {
-        return new Promise((resolve) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                
-                // Scale up for better OCR accuracy
-                const scale = 3;
-                canvas.width = rect.width * scale;
-                canvas.height = rect.height * scale;
-                
-                // Draw scaled image
-                ctx.drawImage(img, rect.x, rect.y, rect.width, rect.height, 0, 0, canvas.width, canvas.height);
-                
-                // Apply image enhancements for better OCR
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const data = imageData.data;
-                
-                // Convert to grayscale and increase contrast
-                for (let i = 0; i < data.length; i += 4) {
-                    const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
-                    // Increase contrast
-                    const contrast = ((gray - 128) * 1.5) + 128;
-                    const final = Math.max(0, Math.min(255, contrast));
-                    
-                    data[i] = final;     // Red
-                    data[i + 1] = final; // Green
-                    data[i + 2] = final; // Blue
-                }
-                
-                ctx.putImageData(imageData, 0, 0);
-                resolve(canvas.toDataURL('image/png'));
-            };
-            img.src = dataUrl;
+        return new Promise((resolve, reject) => {
+            try {
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        const scale = 2;
+                        canvas.width = rect.width * scale;
+                        canvas.height = rect.height * scale;
+                        
+                        ctx.drawImage(img, rect.x, rect.y, rect.width, rect.height, 0, 0, canvas.width, canvas.height);
+                        
+                        resolve(canvas.toDataURL('image/png'));
+                    } catch (e) {
+                        reject(new Error('Image processing failed: ' + e.message));
+                    }
+                };
+                img.onerror = () => reject(new Error('Image loading failed'));
+                img.src = dataUrl;
+            } catch (e) {
+                reject(new Error('Image creation failed: ' + e.message));
+            }
         });
     }
     
     function showNotification(message) {
         const notification = document.createElement('div');
-        notification.textContent = message;
+        notification.textContent = sanitizeText(String(message));
         notification.style.cssText = `
             position: fixed !important;
             top: 70px !important;
@@ -496,6 +356,10 @@
         `;
         document.body.appendChild(notification);
         
-        setTimeout(() => notification.remove(), 3000);
+        setTimeout(() => {
+            if (notification && notification.parentNode) {
+                notification.remove();
+            }
+        }, 3000);
     }
 })();

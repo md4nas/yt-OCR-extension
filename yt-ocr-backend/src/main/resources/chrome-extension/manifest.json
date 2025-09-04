@@ -10,7 +10,7 @@
     "tabs"
   ],
   "host_permissions": [
-    "http://localhost:8080/*",
+    "http://localhost:9090/*",
     "<all_urls>"
   ],
   "background": {
@@ -33,6 +33,6 @@
     }
   ],
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; connect-src http://localhost:8080"
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src http://localhost:9090"
   }
 }
