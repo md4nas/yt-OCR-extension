@@ -13,7 +13,7 @@ try {
 // Input sanitization
 function sanitizeText(text) {
     if (typeof text !== 'string') return '';
-    return text.replace(/[<>"'&]/g, '');
+    return text.replace(/[<>"'&\n\r]/g, '').substring(0, 10000);
 }
 
 // Preview Image

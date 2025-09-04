@@ -128,6 +128,7 @@ public class OcrService {
             return "";
         }
 
+        // Log sanitized for security
         System.out.println("DEBUG - Raw OCR text length: " + rawText.length());
 
         // Fix literal \n in text and normalize line breaks

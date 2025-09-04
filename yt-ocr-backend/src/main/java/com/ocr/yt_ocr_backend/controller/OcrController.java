@@ -71,6 +71,7 @@ public class OcrController {
             }
             
             tmp = File.createTempFile("ocr_", ".img");
+            tmp.deleteOnExit();
             file.transferTo(tmp);
             
             String sanitizedLanguage = sanitizeInput(language);
