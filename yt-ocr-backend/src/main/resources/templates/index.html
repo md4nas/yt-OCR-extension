@@ -63,6 +63,109 @@
         <ul id="historyList"></ul>
     </div>
 
+    <!-- Browser Extension Section -->
+    <div class="extension-section">
+        <h2><i class="fas fa-puzzle-piece"></i> Get Our Browser Extension</h2>
+        <p>Extract text directly from any webpage with our powerful browser extension!</p>
+        <div class="browser-cards">
+            <div class="browser-card">
+                <i class="fab fa-chrome"></i>
+                <h3>Chrome</h3>
+                <p>Available on Chrome Web Store</p>
+                <button onclick="window.open('https://chrome.google.com/webstore', '_blank')">Add to Chrome</button>
+            </div>
+            <div class="browser-card">
+                <i class="fab fa-firefox-browser"></i>
+                <h3>Brave</h3>
+                <p>Compatible with Brave Browser</p>
+                <button onclick="window.open('https://chrome.google.com/webstore', '_blank')">Add to Brave</button>
+            </div>
+            <div class="browser-card">
+                <i class="fab fa-edge"></i>
+                <h3>Edge</h3>
+                <p>Available on Microsoft Edge Add-ons</p>
+                <button onclick="window.open('https://microsoftedge.microsoft.com/addons', '_blank')">Add to Edge</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="faq-section">
+        <h2><i class="fas fa-question-circle"></i> Frequently Asked Questions</h2>
+        <div class="faq-container">
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>What image formats are supported?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>We support all common image formats including JPG, PNG,. The maximum file size is 5MB.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>How accurate is the OCR technology?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Our OCR technology uses Tesseract engine with over 95% accuracy for clear, high-quality images with standard fonts. Accuracy may vary with handwritten text or poor image quality.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Is my data secure and private?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Yes! All image processing is done locally on your device. We don't store or transmit your images to external servers, ensuring complete privacy.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Can I use this for multiple languages?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Currently, we support English text recognition. We're working on adding support for more languages in future updates.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>How do I use the browser extension?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>After installing the extension, simply click the extension icon and select "Capture Screen" to extract text from any part of your screen or webpage.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donate Section -->
+    <div class="donate-section">
+        <h2><i class="fas fa-heart"></i> Support Our Project</h2>
+        <p>Help us keep this service free and improve it further!</p>
+        <div class="donate-content">
+            <div class="donate-info">
+                <h3>Why Donate?</h3>
+                <ul>
+                    <li><i class="fas fa-server"></i> Server maintenance costs</li>
+                    <li><i class="fas fa-code"></i> Continuous development</li>
+                    <li><i class="fas fa-plus"></i> Adding new features</li>
+                    <li><i class="fas fa-language"></i> Multi-language support</li>
+                </ul>
+            </div>
+            <div class="donate-buttons">
+                <button class="donate-btn github" onclick="window.open('https://github.com/sponsors/md4nas', '_blank')">
+                    <i class="fab fa-github"></i> GitHub Sponsors
+                </button>
+                <button class="donate-btn coffee" onclick="window.open('https://buymeacoffee.com/md4nas', '_blank')">
+                    <i class="fas fa-coffee"></i> Buy Me a Coffee
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal for viewing previous OCR results -->
     <div id="historyModal" class="modal">
         <div class="modal-content">
