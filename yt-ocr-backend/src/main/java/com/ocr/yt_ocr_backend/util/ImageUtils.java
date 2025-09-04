@@ -19,14 +19,17 @@ public class ImageUtils {
             cleaned = cleaned.substring(comma + 1); // strip "data: image/...;base64"
         }
         byte[] bytes = Base64.getDecoder().decode(cleaned);
-        BufferedImage img = ImageIO.read(new ByteArrayInputStream(bytes));
-        if (img == null) throw new IOException("Invalid image data");
+        
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes)) {
+            BufferedImage img = ImageIO.read(bis);
+            if (img == null) throw new IOException("Invalid image data");
 
-        BufferedImage processed = preprocess(img);
+            BufferedImage processed = preprocess(img);
 
-        File tmp = File.createTempFile("ocr_", ".png");
-        ImageIO.write(processed, "png", tmp);
-        return tmp;
+            File tmp = File.createTempFile("ocr_", ".png");
+            ImageIO.write(processed, "png", tmp);
+            return tmp;
+        }
     }
 
     // Basic image preprocessing for better OCR
@@ -36,15 +39,21 @@ public class ImageUtils {
         int h = src.getHeight() * 2;
         BufferedImage scaled = new BufferedImage(w,h, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = scaled.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g.drawImage(src, 0,0,null);
-        g.dispose();
+        try {
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g.drawImage(src, 0, 0, w, h, null);
+        } finally {
+            g.dispose();
+        }
 
         //2. convert to grayscale
         BufferedImage gray = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
-        Graphics g2 =  gray.getGraphics();
-        g2.drawImage(scaled, 0,0,null);
-        g2.dispose();
+        Graphics g2 = gray.getGraphics();
+        try {
+            g2.drawImage(scaled, 0, 0, null);
+        } finally {
+            g2.dispose();
+        }
 
         //3. Light contrast stretch (normalize)
         RescaleOp op = new RescaleOp(1.5f, 10, null); // scale offset
