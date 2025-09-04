@@ -128,9 +128,6 @@ public class OcrService {
             return "";
         }
 
-        // Log sanitized for security
-        System.out.println("DEBUG - Raw OCR text length: " + rawText.length());
-
         // Fix literal \n in text and normalize line breaks
         rawText = rawText.replace("\\n", "\n");
         rawText = rawText.replace("\\r\\n", "\n");
@@ -142,7 +139,6 @@ public class OcrService {
         rawText = rawText.replace("| ", "\n"); // Handle | as line separator
         
         String[] lines = rawText.split("\n");
-        System.out.println("DEBUG - Split into " + lines.length + " lines");
         
         StringBuilder formatted = new StringBuilder();
         
@@ -155,7 +151,6 @@ public class OcrService {
         }
         
         String result = formatted.toString().trim();
-        System.out.println("DEBUG - Final result length: " + result.length());
         return result;
     }
 
