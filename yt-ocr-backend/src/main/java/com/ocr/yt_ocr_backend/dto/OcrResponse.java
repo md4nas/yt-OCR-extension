@@ -30,18 +30,16 @@ public class OcrResponse {
             return;
         }
 
+        // Handle literal \n in text
+        text = text.replace("\\n", "\n");
+        
         String[] lines = text.split("\n");
+        int lineNumber = 1;
+        
         for (String line : lines) {
             line = line.trim();
             if (!line.isEmpty()) {
-                if (line.matches("^\\d+\\. .*")) {
-                    int dotIndex = line.indexOf(". ");
-                    int lineNo = Integer.parseInt(line.substring(0, dotIndex));
-                    String content = line.substring(dotIndex + 2);
-                    rows.add(new TextRow(lineNo, content));
-                } else {
-                    rows.add(new TextRow(rows.size() + 1, line));
-                }
+                rows.add(new TextRow(lineNumber++, line));
             }
         }
         this.totalLines = rows.size();
